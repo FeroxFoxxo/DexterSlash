@@ -9,8 +9,8 @@
 
 A free, open-source, sophisticated Discord bot written in C# using .NET Core 6 and ASP.NET, including RESTFUL APIs, leaderboard systems, and moderation capabilities.
 
-[![Discord](https://img.shields.io/discord/336243033416794118.svg?color=7000FB&label=discord&style=for-the-badge)](https://discord.gg/H8bcFr2)
-[![License](https://img.shields.io/github/license/GreemDev/Volte.svg?color=7000FB&style=for-the-badge)](https://github.com/GreemDev/Volte/blob/rewrite/LICENSE)
+[![Discord](https://img.shields.io/discord/336243033416794118.svg?color=7000FB&label=discord&style=for-the-badge)](https://discord.gg/USFurries)
+[![License](https://img.shields.io/github/license/FeroxFoxxo/DiscordSlash.svg?color=7000FB&style=for-the-badge)](https://github.com/FeroxFoxxo/DiscordSlash/blob/master/LICENSE)
   
 |**Lead:** [@FeroxFoxxo](https://github.com/FeroxFoxxo)|**Lang:** C#|**Library:** [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus)|[Discord Server](https://discord.gg/USFurries)|**Runtime**: .NET 6
 |---|---|---|---|---|
