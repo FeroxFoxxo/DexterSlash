@@ -23,7 +23,7 @@ Proudly, the backend of this project is built off MASZ - an open-source, web-bas
 
 [![MASZ](https://img.shields.io/badge/MARZ-Visit%20Here-blue?style=for-the-badge)](https://github.com/zaanposni/discord-masz)
 
-## 🤝 Contribute
+## ❤️ Contribute
 
 Contributions are welcome.
 You can find our code of conduct [here](https://github.com/FeroxFoxxo/DiscordSlash/blob/master/CODE_OF_CONDUCT.md).
