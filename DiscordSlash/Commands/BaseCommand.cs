@@ -1,4 +1,5 @@
 ﻿using DiscordSlash.Enums;
+using DiscordSlash.Identities;
 using DiscordSlash.Services;
 using DSharpPlus;
 using DSharpPlus.SlashCommands;
@@ -61,10 +62,7 @@ namespace DiscordSlash.Commands
         private async Task RequireDiscordPermission(BaseContext ctx, DiscordPermission permission)
         {
             await RequireRegisteredGuild(ctx);
-            if (currentIdentity.IsSiteAdmin())
-            {
-                return;
-            }
+
             switch (permission)
             {
                 case (DiscordPermission.Member):
@@ -77,6 +75,7 @@ namespace DiscordSlash.Commands
                     if (await currentIdentity.HasAdminRoleOnGuild(ctx.Guild.Id)) return;
                     break;
             }
+
             throw new UnauthorizedException("You are not allowed to do that.");
         }
 

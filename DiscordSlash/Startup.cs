@@ -113,8 +113,6 @@ namespace DiscordSlash
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors("AngularDevCors");
-
             app.UseIpRateLimiting();
 
             using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
