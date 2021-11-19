@@ -21,7 +21,7 @@ A free, open-source, sophisticated Discord bot written in C# using .NET Core 6 a
 
 Proudly, the backend of this project is built off MASZ - an open-source, web-based discord bot.
 
-[![MASZ](https://img.shields.io/badge/MARZ-Visit%20Here-blue?style=for-the-badge)](https://github.com/FeroxFoxxo/DiscordSlash/blob/master/LICENSE)
+[![MASZ](https://img.shields.io/badge/MARZ-Visit%20Here-blue?style=for-the-badge)](https://github.com/zaanposni/discord-masz)
 
 ## 🤝 Contribute
 
