@@ -5,7 +5,7 @@
         </td>
         <td align="center" width="75%">
             
-# Dexter
+# Dexter Slash
 
 A free, open-source, sophisticated Discord bot written in C# using .NET Core 6 and ASP.NET, including RESTFUL APIs, leaderboard systems, and moderation capabilities.
 
