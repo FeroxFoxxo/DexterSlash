@@ -32,6 +32,8 @@ namespace DiscordSlash
 
             services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
+            services.AddHostedService<DiscordBot>();
+
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie("Cookies", options =>
                 {
@@ -85,6 +87,8 @@ namespace DiscordSlash
 
             // Stores rate limit counters and ip rules.
             services.AddMemoryCache();
+
+            services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
 
             // Loads general configuration from appsettings.json
             services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));

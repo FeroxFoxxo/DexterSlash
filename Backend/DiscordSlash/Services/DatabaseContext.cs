@@ -6,14 +6,5 @@ namespace DiscordSlash.Services
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
-        public static readonly ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddConsole();
-        });
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseLoggerFactory(loggerFactory).EnableSensitiveDataLogging();
-        }
     }
 }
