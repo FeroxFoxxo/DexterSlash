@@ -40,7 +40,7 @@ namespace DiscordSlash.Services
                 Services = serviceProvider
             });
 
-            slash.RegisterCommands<Say>(613441321751019550);
+            slash.RegisterCommands<SayCommand>(613441321751019550);
 
             slash.SlashCommandErrored += CmdErroredHandler;
         }
@@ -112,8 +112,7 @@ namespace DiscordSlash.Services
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            DiscordActivity activity = new ("Netflix", ActivityType.Watching);
-            await client.ConnectAsync(activity);
+            await client.ConnectAsync();
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

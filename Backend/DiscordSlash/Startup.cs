@@ -1,4 +1,5 @@
 ﻿using AspNetCoreRateLimit;
+using DiscordSlash.Contexts;
 using DiscordSlash.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

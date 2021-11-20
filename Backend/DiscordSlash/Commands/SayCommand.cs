@@ -5,12 +5,12 @@ using DSharpPlus.SlashCommands;
 
 namespace DiscordSlash.Commands
 {
-    public class Say : Base<Say>
+    public class SayCommand : BaseCommand<SayCommand>
     {
 
         [SlashCommand("say", "Let the bot send a message.")]
 
-        public async Task SayCommand(InteractionContext ctx, [Option("message", "message content the bot shall write")] string message,
+        public async Task Say(InteractionContext ctx, [Option("message", "message content the bot shall write")] string message,
             [Option("channel", "channel to write the message in, defaults to current")] DiscordChannel channel = null)
         {
             if (channel == null)
@@ -31,7 +31,6 @@ namespace DiscordSlash.Commands
 
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                     new DiscordInteractionResponseBuilder().WithContent("Message sent.").AsEphemeral(true));
-
             }
             catch (UnauthorizedException)
             {

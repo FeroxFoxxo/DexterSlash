@@ -2,6 +2,7 @@
 {
     public enum APIError
     {
-        Unknown = 0,
+        Unknown,
+        ResourceNotFound
     }
 }

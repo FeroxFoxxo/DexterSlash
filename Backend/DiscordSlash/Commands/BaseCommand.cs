@@ -3,7 +3,7 @@
 namespace DiscordSlash.Commands
 {
     [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
-    public abstract class Base<T> : ApplicationCommandModule
+    public abstract class BaseCommand<T> : ApplicationCommandModule
     {
 
         public ILogger<T> Logger { get; set; }
