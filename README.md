@@ -17,12 +17,6 @@ A free, open-source Discord bot written in C# using .NET Core 6 and ASP.NET, inc
           
 </table>
 
-## ❤️ Backend Built On MASZ
-
-Proudly, the backend of this project is built off MASZ - an open-source, web-based discord bot.
-
-[![MASZ](https://img.shields.io/badge/MARZ-Visit%20Here-blue?style=for-the-badge)](https://github.com/zaanposni/discord-masz)
-
 ## 🤝 Contribute
 
 Contributions are welcome.
@@ -31,10 +25,16 @@ If you are new to open source, checkout this [tutorial](https://github.com/first
 
 ## 📃 Request logging and ratelimit
 
-MASZ and Dexter uses the X-Forwarded-For http header for logging and ratelimit.
+Dexter uses the X-Forwarded-For http header for logging and ratelimit.
 Ensure that this header is set in your reverse proxy for best experience.
 
 ## 🤖 Discord
 
 If you are using a local deployed backend you have to define https://127.0.0.1:port/ and https://127.0.0.1:port/signin-discord as valid redirect in your Discord application settings.
+
+## ❤️ Backend Built On MASZ
+
+Proudly, the backend of this project is built off MASZ - an open-source, web-based discord bot.
+
+[![MASZ](https://img.shields.io/badge/MARZ-Visit%20Here-blue?style=for-the-badge)](https://github.com/zaanposni/discord-masz)
 
