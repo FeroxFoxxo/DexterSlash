@@ -1,4 +1,4 @@
-﻿using DiscordSlash.Contexts;
+﻿using DiscordSlash.Database;
 
 namespace DiscordSlash.Repositories
 {

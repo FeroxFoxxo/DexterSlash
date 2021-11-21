@@ -1,5 +1,6 @@
 ﻿using DiscordSlash.Exceptions;
 using DiscordSlash.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DiscordSlash.Repositories
 {

@@ -1,5 +1,6 @@
 ﻿using DiscordSlash.Commands;
 using DiscordSlash.Exceptions;
+using DiscordSlash.Logging;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -21,11 +22,15 @@ namespace DiscordSlash.Services
         {
             this.logger = logger;
 
+            var loggerFactory = new LoggerFactory();
+            loggerFactory.AddProvider(new LoggerProvider());
+
             DiscordConfiguration discordConfiguration = new ()
             {
                 Token = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN"),
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers,
+                LoggerFactory = loggerFactory,
                 MessageCacheSize = 10240
             };
 
