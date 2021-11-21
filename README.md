@@ -7,7 +7,7 @@
             
 # Dexter Slash
 
-A free, open-source Discord bot written in C# using .NET Core 6 and ASP.NET, including RESTFUL APIs, leaderboard systems, and moderation capabilities, built off of MASZ.
+A free, open-source Discord bot written in C# using .NET Core 6 and ASP.NET, including RESTFUL APIs, leaderboard systems, and moderation capabilities.
 
 [![Discord](https://img.shields.io/discord/336243033416794118.svg?color=7000FB&label=discord&style=for-the-badge)](https://discord.gg/USFurries)
 [![License](https://img.shields.io/github/license/FeroxFoxxo/DiscordSlash.svg?color=7000FB&style=for-the-badge)](https://github.com/FeroxFoxxo/DiscordSlash/blob/master/LICENSE)
