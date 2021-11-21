@@ -1,6 +1,7 @@
 ﻿using AspNetCoreRateLimit;
 using DiscordSlash.Database;
 using DiscordSlash.Logging;
+using DiscordSlash.Middlewares;
 using DiscordSlash.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -90,6 +91,7 @@ namespace DiscordSlash
             // Stores rate limit counters and ip rules.
             services.AddMemoryCache();
 
+
             services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
 
             // Loads general configuration from appsettings.json
@@ -103,6 +105,9 @@ namespace DiscordSlash
             services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
 
             services.AddMvc();
+
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen();
 
             // The IHttpContextAccessor service is not registered by default, though the clientId/clientIp resolvers use it.
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -119,7 +124,14 @@ namespace DiscordSlash
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
+
+            app.UseMiddleware<APIExceptionHandlingMiddleware>();
+            app.UseMiddleware<HeaderMiddleware>();
+            app.UseMiddleware<RequestLoggingMiddleware>();
 
             app.UseIpRateLimiting();
 

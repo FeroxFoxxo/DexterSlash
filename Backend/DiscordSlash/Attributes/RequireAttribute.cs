@@ -9,9 +9,9 @@ namespace DiscordSlash.Attributes
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public class RequireAttribute : SlashCheckBaseAttribute
     {
-        private readonly PermissionLevel UserPerm;
+        private readonly UserPermission UserPerm;
 
-        public RequireAttribute(PermissionLevel permissionLevel)
+        public RequireAttribute(UserPermission permissionLevel)
         {
 			UserPerm = permissionLevel;
         }
@@ -28,22 +28,22 @@ namespace DiscordSlash.Attributes
 			return currentPerm == UserPerm;
 		}
 
-		public PermissionLevel GetPermissionLevel(DiscordMember user, GuildConfig config)
+		public UserPermission GetPermissionLevel(DiscordMember user, GuildConfig config)
 		{
 			if (user == null)
-				return PermissionLevel.Default;
+				return UserPermission.Default;
 			else if (user.Roles.Where(role => config.AdminRoles.Contains(role.Id)).Any())
-				return PermissionLevel.Administrator;
+				return UserPermission.Administrator;
 			else if (user.Roles.Where(role => config.ModRoles.Contains(role.Id)).Any())
-				return PermissionLevel.Moderator;
+				return UserPermission.Moderator;
 			else if (user.Roles.Where(role => config.WelcomerRoles.Contains(role.Id)).Any())
-				return PermissionLevel.Welcomer;
+				return UserPermission.Welcomer;
 			else if (user.Roles.Where(role => config.ElevatedRoles.Contains(role.Id)).Any())
-				return PermissionLevel.Elevated;
+				return UserPermission.Elevated;
 			else if (user.Roles.Where(role => config.DJRoles.Contains(role.Id)).Any())
-				return PermissionLevel.DJ;
+				return UserPermission.DJ;
 			else
-				return PermissionLevel.Default;
+				return UserPermission.Default;
 		}
 
 	}

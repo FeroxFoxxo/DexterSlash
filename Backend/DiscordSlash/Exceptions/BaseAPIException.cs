@@ -6,11 +6,11 @@ namespace DiscordSlash.Exceptions
     {
         public APIError Error { get; set; } = APIError.Unknown;
 
-        public BaseAPIException(string? message) : base(message)
+        public BaseAPIException(string message) : base(message)
         {
         }
 
-        public BaseAPIException(string? message, APIError error) : base(message)
+        public BaseAPIException(string message, APIError error) : base(message)
         {
             Error = error;
         }

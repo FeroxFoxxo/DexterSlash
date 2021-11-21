@@ -3,6 +3,7 @@
     public enum APIError
     {
         Unknown,
-        ResourceNotFound
+        ResourceNotFound,
+        Unauthorized
     }
 }

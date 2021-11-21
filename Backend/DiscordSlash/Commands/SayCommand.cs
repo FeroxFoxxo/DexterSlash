@@ -1,4 +1,6 @@
-﻿using DSharpPlus;
+﻿using DiscordSlash.Attributes;
+using DiscordSlash.Enums;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
@@ -9,6 +11,7 @@ namespace DiscordSlash.Commands
     {
 
         [SlashCommand("say", "Let the bot send a message.")]
+        [Require(UserPermission.Moderator)]
 
         public async Task Say(InteractionContext ctx, [Option("message", "message content the bot shall write")] string message,
             [Option("channel", "channel to write the message in, defaults to current")] DiscordChannel channel = null)

@@ -1,6 +1,6 @@
 ﻿namespace DiscordSlash.Enums
 {
-    public enum PermissionLevel
+    public enum UserPermission
 	{
 		Default,
 		DJ,
