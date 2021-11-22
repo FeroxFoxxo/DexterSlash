@@ -14,7 +14,7 @@ namespace DiscordSlash.Controllers
         {
             if (string.IsNullOrEmpty(ReturnUrl))
             {
-                ReturnUrl = "https://github.com/zaanposni";
+                ReturnUrl = "/guilds";
             }
 
             var properties = new AuthenticationProperties()
