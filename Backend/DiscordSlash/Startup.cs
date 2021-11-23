@@ -67,20 +67,6 @@ namespace DiscordSlash
                     options.CorrelationCookie.HttpOnly = false;
                 });
 
-            _ = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer("Tokens", x =>
-                {
-                    x.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(
-                                Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN"))),
-                        ValidateIssuer = false,
-                        ValidateAudience = false
-                    };
-                });
-
             services.AddAuthorization(options =>
             {
                 options.DefaultPolicy = new AuthorizationPolicyBuilder("Cookies", "Tokens")
@@ -90,8 +76,7 @@ namespace DiscordSlash
 
             // Stores rate limit counters and ip rules.
             services.AddMemoryCache();
-
-
+            
             services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
 
             // Loads general configuration from appsettings.json

@@ -10,16 +10,10 @@ namespace DiscordSlash.Controllers
     public class AuthenticationController : ControllerBase
     {
         [HttpGet("login")]
-        public IActionResult Login([FromQuery] string ReturnUrl)
+        public IActionResult Login()
         {
-            if (string.IsNullOrEmpty(ReturnUrl))
-            {
-                ReturnUrl = "/guilds";
-            }
-
             var properties = new AuthenticationProperties()
             {
-                RedirectUri = ReturnUrl,
                 Items =
                 {
                     { "LoginProvider", "Discord" },
