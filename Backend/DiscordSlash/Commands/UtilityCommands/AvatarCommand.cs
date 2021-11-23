@@ -2,7 +2,6 @@
 using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
-using System.Runtime.InteropServices;
 
 namespace DexterSlash.Commands.UtilityCommands
 {
@@ -18,7 +17,7 @@ namespace DexterSlash.Commands.UtilityCommands
 
 		[SlashCommand("avatar", "Gets the avatar of a user mentioned or yours.")]
 		
-		public async Task SendAvatar([Optional] IUser user)
+		public async Task SendAvatar(IUser user = null)
 		{
 			if (user == null)
 				user = Context.User;

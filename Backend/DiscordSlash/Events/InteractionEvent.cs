@@ -1,6 +1,9 @@
-﻿using Discord;
+﻿using Dexter.Enums;
+using DexterSlash.Extensions;
+using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using System.Text.RegularExpressions;
 
 namespace DexterSlash.Events
 {
@@ -24,16 +27,18 @@ namespace DexterSlash.Events
             // Process the InteractionCreated payloads to execute Interactions commands
             _client.InteractionCreated += HandleInteraction;
 
-            // Process the command execution results 
+            // Process the command execution results
             _commands.SlashCommandExecuted += SlashCommandExecuted;
 
-            _client.ShardReady += async (_) =>
+            _client.ShardReady += async (shard) =>
             {
                 _logger.LogInformation("Initializing guild commands.");
                 
                 try
                 {
-                    await _commands.RegisterCommandsToGuildAsync(613441321751019550);
+                    foreach(var guild in shard.Guilds)
+                        await _commands.RegisterCommandsToGuildAsync(guild.Id);
+
                     _logger.LogInformation("Sucessfully initialized commands!");
                 }
                 catch (Exception ex)
@@ -62,33 +67,88 @@ namespace DexterSlash.Events
             }
         }
 
-        private Task SlashCommandExecuted(SlashCommandInfo commandInfo, IInteractionContext interactionContext, Discord.Interactions.IResult result)
+        private async Task SlashCommandExecuted(SlashCommandInfo commandInfo, IInteractionContext interactionContext, Discord.Interactions.IResult result)
         {
-            if (!result.IsSuccess)
+            if (result.IsSuccess)
+                return;
+
+            switch (result.Error)
             {
-                switch (result.Error)
-                {
-                    case InteractionCommandError.UnmetPrecondition:
-                        // implement
-                        break;
-                    case InteractionCommandError.UnknownCommand:
-                        // implement
-                        break;
-                    case InteractionCommandError.BadArgs:
-                        // implement
-                        break;
-                    case InteractionCommandError.Exception:
-                        // implement
-                        break;
-                    case InteractionCommandError.Unsuccessful:
-                        // implement
-                        break;
-                    default:
-                        break;
-                }
+                case InteractionCommandError.UnmetPrecondition:
+                    if (result.ErrorReason.Length <= 0)
+                        return;
+
+                    await interactionContext.Interaction.RespondAsync(
+                        embed: 
+                            CreateEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Halt! Don't go there-")
+                                .WithDescription(result.ErrorReason)
+                                .Build()
+                        );
+                    break;
+                case InteractionCommandError.UnknownCommand:
+                    await interactionContext.Interaction.RespondAsync(
+                        embed:
+                            CreateEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Unknown Command.")
+                                .WithDescription($"Oopsies! It seems as if the command **{commandInfo.Name}** doesn't exist!")
+                                .Build()
+                        );
+                    break;
+                case InteractionCommandError.BadArgs:
+                    await interactionContext.Interaction.RespondAsync(
+                        embed:
+                            CreateEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Unable to parse command!")
+                                .WithDescription($"Invalid amount of command arguments.")
+                                .Build()
+                        );
+                    break;
+                case InteractionCommandError.Exception:
+                    if (result.ToString().Contains("ObjectNotFound"))
+                    {
+                        await interactionContext.Interaction.RespondAsync(
+                            embed:
+                                CreateEmbed(EmojiEnum.Annoyed)
+                                    .WithTitle(result.ErrorReason)
+                                    .WithDescription($"If you believe this was an error, please do contact a developer!\n" +
+                                        $"If the {result.ErrorReason.Split(' ')[0].ToLower()} does exist, it may be due to caching. If so, please wait a few minutes.")
+                                    .Build()
+                            );
+                        return;
+                    }
+
+                    // If the error is not an ObjectNotFound error, we log the message to the console with the appropriate data.
+                    _logger.LogWarning($"Unknown statement reached!\nCommand: {commandInfo.Name}\nresult: {result}");
+
+                    await interactionContext.Interaction.RespondAsync(
+                        embed:
+                            CreateEmbed(EmojiEnum.Annoyed)
+                                .WithTitle(Regex.Replace(result.Error.GetType().Name, @"(?<!^)(?=[A-Z])", " "))
+                                .WithDescription(result.ErrorReason)
+                                .Build()
+                        );
+
+                    break;
+                case InteractionCommandError.Unsuccessful:
+                    await interactionContext.Interaction.RespondAsync(
+                        embed:
+                            CreateEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Command Unsuccessful!")
+                                .WithDescription($"I was unable to run this command, please contact a developer!")
+                                .Build()
+                        );
+                    break;
+                default:
+                    break;
             }
 
-            return Task.CompletedTask;
         }
+
+        public EmbedBuilder CreateEmbed(EmojiEnum thumbnail)
+        {
+            return new EmbedBuilder().CreateEmbed(thumbnail, EmbedCallingType.Command);
+        }
+
     }
 }

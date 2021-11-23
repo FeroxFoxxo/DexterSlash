@@ -18,17 +18,17 @@ namespace DexterSlash.Commands.UtilityCommands
 
 		public async Task WolframCommand(string question)
 		{
-			string Response = await WolframAlphaClient.SpokenResultAsync(question);
+			string response = await WolframAlphaClient.SpokenResultAsync(question);
 
-			Response = Response.Replace("Wolfram Alpha", Context.Client.CurrentUser.Username);
-			Response = Response.Replace("Wolfram|Alpha", Context.Client.CurrentUser.Username);
-			Response = Response.Replace("Stephen Wolfram", "the goat overlords");
-			Response = Response.Replace("and his team", "and their team");
+			response = response.Replace("Wolfram Alpha", Context.Client.CurrentUser.Username);
+			response = response.Replace("Wolfram|Alpha", Context.Client.CurrentUser.Username);
+			response = response.Replace("Stephen Wolfram", "the goat overlords");
+			response = response.Replace("and his team", "and their team");
 
-			if (Response == "DexterBot did not understand your input" || Response == "No spoken result available")
-				await RespondAsync(text: Response, ephemeral: true);
+			if (response == "DexterBot did not understand your input" || response == "No spoken result available")
+				await RespondAsync(text: response, ephemeral: true);
 			else
-				await RespondAsync(text: Response);
+				await RespondAsync(text: $"**{question}**\n{response}");
 		}
 
 	}

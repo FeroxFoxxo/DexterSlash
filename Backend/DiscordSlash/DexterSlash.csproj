@@ -9,7 +9,7 @@
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.0" />
     <PackageReference Include="AspNetCoreRateLimit" Version="4.0.1" />
     <PackageReference Include="Discord.Net.Labs" Version="3.3.3" />
-    <PackageReference Include="Discord.Net.Labs.Interactions" Version="3.3.2-2021.11.21" />
+    <PackageReference Include="Discord.Net.Labs.Interactions" Version="3.3.3-2021.11.23" />
     <PackageReference Include="Genbox.WolframAlpha" Version="3.0.0-alpha3" />
     <PackageReference Include="Humanizer" Version="2.13.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">

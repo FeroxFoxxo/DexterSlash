@@ -5,7 +5,7 @@ using Discord.Interactions;
 
 namespace DexterSlash.Commands
 {
-    public abstract class BaseCommand<T> : InteractionModuleBase<SocketInteractionContext>
+    public abstract class BaseCommand<T> : InteractionModuleBase<ShardedInteractionContext>
 	{
 
         public ILogger<T> Logger { get; set; }
