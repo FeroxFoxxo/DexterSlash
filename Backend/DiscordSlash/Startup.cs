@@ -1,14 +1,14 @@
 ﻿using AspNetCoreRateLimit;
-using DiscordSlash.Database;
-using DiscordSlash.Identity;
-using DiscordSlash.Logging;
-using DiscordSlash.Middlewares;
-using DiscordSlash.Services;
+using DexterSlash.Databases.Context;
+using DexterSlash.Identity;
+using DexterSlash.Logging;
+using DexterSlash.Middlewares;
+using DexterSlash.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
-namespace DiscordSlash
+namespace DexterSlash
 {
     public class Startup
     {
@@ -33,9 +33,6 @@ namespace DiscordSlash
 
             services.AddDbContext<DatabaseContext>(x => x.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-            services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
-
-            services.AddSingleton<DiscordBot>();
             services.AddSingleton<OAuthManager>();
             services.AddSingleton<RestBot>();
 
@@ -138,8 +135,6 @@ namespace DiscordSlash
             using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 scope.ServiceProvider.GetRequiredService<DatabaseContext>().Database.Migrate();
-
-                _ = scope.ServiceProvider.GetRequiredService<DiscordBot>().StartAsync();
             }
 
             app.UseHttpsRedirection();

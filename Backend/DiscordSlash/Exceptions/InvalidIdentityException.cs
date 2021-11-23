@@ -1,6 +1,6 @@
-﻿using DiscordSlash.Enums;
+﻿using DexterSlash.Enums;
 
-namespace DiscordSlash.Exceptions
+namespace DexterSlash.Exceptions
 {
     public class InvalidIdentityException : BaseAPIException
     {

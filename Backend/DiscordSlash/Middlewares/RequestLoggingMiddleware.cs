@@ -1,4 +1,4 @@
-﻿namespace DiscordSlash.Middlewares
+﻿namespace DexterSlash.Middlewares
 {
     public class RequestLoggingMiddleware
     {

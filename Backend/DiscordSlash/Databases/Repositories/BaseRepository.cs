@@ -1,6 +1,6 @@
-﻿using DiscordSlash.Database;
+﻿using DexterSlash.Databases.Context;
 
-namespace DiscordSlash.Repositories
+namespace DexterSlash.Databases.Repositories
 {
     public class BaseRepository<T>
     {

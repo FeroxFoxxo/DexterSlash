@@ -1,18 +1,18 @@
-﻿using DSharpPlus.Entities;
+﻿using Discord.Rest;
 
-namespace DiscordSlash.Identity
+namespace DexterSlash.Identity
 {
     public class DiscordOAuth
     {
 
         public readonly DateTime ValidUntil;
 
-        public readonly DiscordUser CurrentUser;
+        public readonly DiscordRestClient RestClient;
 
-        public DiscordOAuth(DiscordUser currentUser)
+        public DiscordOAuth(DiscordRestClient restClient)
         {
             ValidUntil = DateTime.UtcNow.AddMinutes(15);
-            CurrentUser = currentUser;
+            RestClient = restClient;
         }
 
     }

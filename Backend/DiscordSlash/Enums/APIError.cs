@@ -1,4 +1,4 @@
-﻿namespace DiscordSlash.Enums
+﻿namespace DexterSlash.Enums
 {
     public enum APIError
     {

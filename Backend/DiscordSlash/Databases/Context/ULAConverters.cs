@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace DiscordSlash.Database
+namespace DexterSlash.Databases.Context
 {
     public class ULAConverter : ValueConverter<ulong[], string>
     {

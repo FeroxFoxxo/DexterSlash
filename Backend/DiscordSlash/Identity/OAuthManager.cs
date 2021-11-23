@@ -1,10 +1,10 @@
-﻿using DiscordSlash.Enums;
-using DiscordSlash.Exceptions;
-using DiscordSlash.Services;
-using DSharpPlus.Entities;
+﻿using DexterSlash.Enums;
+using DexterSlash.Exceptions;
+using DexterSlash.Services;
+using Discord.Rest;
 using Microsoft.AspNetCore.Authentication;
 
-namespace DiscordSlash.Identity
+namespace DexterSlash.Identity
 {
     public class OAuthManager
     {
@@ -66,7 +66,7 @@ namespace DiscordSlash.Identity
 
             string token = await httpContext.GetTokenAsync("Cookies", "access_token");
 
-            DiscordUser user = await _serviceProvider.GetService<RestBot>()
+            DiscordRestClient user = await _serviceProvider.GetService<RestBot>()
                 .FetchCurrentUserInfo(token, CacheBehavior.IgnoreButCacheOnError);
 
             DiscordOAuth identity = new(user);

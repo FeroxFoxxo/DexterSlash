@@ -1,5 +1,5 @@
 ﻿
-namespace DiscordSlash.Logging
+namespace DexterSlash.Logging
 {
     internal class ConsoleLogger : ILogger
     {

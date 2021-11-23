@@ -1,9 +1,8 @@
-﻿using DSharpPlus.SlashCommands;
+﻿using Discord.Commands;
 
-namespace DiscordSlash.Commands
+namespace DexterSlash.Commands
 {
-    [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
-    public abstract class BaseCommand<T> : ApplicationCommandModule
+    public abstract class BaseCommand<T> : ModuleBase<SocketCommandContext>
     {
 
         public ILogger<T> Logger { get; set; }

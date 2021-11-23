@@ -1,16 +1,17 @@
-﻿using DiscordSlash.Models;
-using DiscordSlash.Services;
+﻿using DexterSlash.Databases.Models;
+using Discord;
+using Discord.WebSocket;
 using System.Diagnostics;
 
-namespace DiscordSlash.Repositories
+namespace DexterSlash.Databases.Repositories
 {
     public class StatusRepository : BaseRepository<StatusRepository>
     {
 
-        private readonly DiscordBot _discordBot;
+        private readonly DiscordShardedClient _client;
 
         public StatusRepository(IServiceProvider serviceProvider) : base(serviceProvider) {
-            _discordBot = serviceProvider.GetRequiredService<DiscordBot>();
+            _client = serviceProvider.GetRequiredService<DiscordShardedClient>();
         }
 
         public async Task<StatusDetail> GetDbStatus()
@@ -36,17 +37,14 @@ namespace DiscordSlash.Repositories
             StatusDetail botStatus = new();
             try
             {
-                if (!_discordBot.IsRunning())
-                {
+                if (_client.LoginState != LoginState.LoggedIn)
                     botStatus.Online = false;
-                    botStatus.LastDisconnect = _discordBot.GetLastDisconnectTime();
-                }
-                botStatus.ResponseTime = _discordBot.GetPing();
+
+                botStatus.ResponseTime = _client.Latency;
             }
             catch (Exception)
             {
                 botStatus.Online = false;
-                botStatus.LastDisconnect = _discordBot.GetLastDisconnectTime();
             }
             return botStatus;
         }

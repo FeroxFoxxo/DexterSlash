@@ -1,8 +1,8 @@
-﻿using DiscordSlash.Exceptions;
-using DiscordSlash.Models;
+﻿using DexterSlash.Databases.Models;
+using DexterSlash.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
-namespace DiscordSlash.Repositories
+namespace DexterSlash.Databases.Repositories
 {
     public class GuildConfigRepository : BaseRepository<GuildConfigRepository>
     {

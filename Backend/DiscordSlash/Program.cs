@@ -1,4 +1,9 @@
-﻿namespace DiscordSlash
+﻿using Discord;
+using Discord.Addons.Hosting;
+using Discord.Commands;
+using Discord.WebSocket;
+
+namespace DexterSlash
 {
     public class Program
     {
@@ -12,6 +17,23 @@
                 .ConfigureLogging(logging =>
                 {
                     logging.ClearProviders();
+                })
+                .ConfigureDiscordShardedHost((context, config) =>
+                {
+                    config.SocketConfig = new DiscordSocketConfig
+                    {
+                        AlwaysDownloadUsers = true,
+                        MessageCacheSize = 200,
+                        LogLevel = LogSeverity.Debug,
+                        GatewayIntents = GatewayIntents.All
+                    };
+                    config.Token = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN");
+                })
+                .UseCommandService((context, config) =>
+                {
+                    config.DefaultRunMode = RunMode.Async;
+                    config.LogLevel = LogSeverity.Debug;
+                    config.CaseSensitiveCommands = false;
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

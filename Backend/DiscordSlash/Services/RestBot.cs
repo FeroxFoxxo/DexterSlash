@@ -1,10 +1,10 @@
-﻿using DiscordSlash.Enums;
-using DiscordSlash.Exceptions;
-using DiscordSlash.Identity;
-using DSharpPlus;
-using DSharpPlus.Entities;
+﻿using DexterSlash.Enums;
+using DexterSlash.Exceptions;
+using DexterSlash.Identity;
+using Discord;
+using Discord.Rest;
 
-namespace DiscordSlash.Services
+namespace DexterSlash.Services
 {
     public class RestBot
     {
@@ -17,22 +17,14 @@ namespace DiscordSlash.Services
             _cache = new Dictionary<string, CacheApiResponse>();
         }
 
-        public DiscordRestClient GetOAuthClient(string token)
-        {
-            return new DiscordRestClient(new DiscordConfiguration
-            {
-                Token = token,
-                TokenType = TokenType.Bearer,
-            });
-        }
-
-        public async Task<DiscordUser> FetchCurrentUserInfo(string token, CacheBehavior cacheBehavior)
+        public async Task<DiscordRestClient> FetchCurrentUserInfo(string token, CacheBehavior cacheBehavior)
         {
             CacheKey cacheKey = CacheKey.TokenUser(token);
-            DiscordUser user = null;
+            DiscordRestClient user = null;
+
             try
             {
-                user = TryGetFromCache<DiscordUser>(cacheKey, cacheBehavior);
+                user = TryGetFromCache<DiscordRestClient>(cacheKey, cacheBehavior);
                 if (user != null) return user;
             }
             catch (NotFoundInCacheException)
@@ -44,12 +36,14 @@ namespace DiscordSlash.Services
             {
                 _logger.LogError(token);
 
-                user = await GetOAuthClient(token).GetCurrentUserAsync();
+                user = new DiscordRestClient();
+
+                await user.LoginAsync(TokenType.Bearer, token);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, $"Failed to fetch current user for token '{token}' from API.");
-                return FallBackToCache<DiscordUser>(cacheKey, cacheBehavior);
+                return FallBackToCache<DiscordRestClient>(cacheKey, cacheBehavior);
             }
             _cache[cacheKey.Key] = new CacheApiResponse(user);
 

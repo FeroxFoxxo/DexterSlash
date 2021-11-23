@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DiscordSlash.Models
+namespace DexterSlash.Databases.Models
 {
     public class GuildConfig
     {

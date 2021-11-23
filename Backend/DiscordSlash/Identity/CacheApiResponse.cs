@@ -1,4 +1,4 @@
-﻿namespace DiscordSlash.Identity
+﻿namespace DexterSlash.Identity
 {
     public class CacheApiResponse
     {

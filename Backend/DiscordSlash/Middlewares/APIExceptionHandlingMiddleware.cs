@@ -1,7 +1,7 @@
-﻿using DiscordSlash.Exceptions;
+﻿using DexterSlash.Exceptions;
 using Newtonsoft.Json;
 
-namespace DiscordSlash.Middlewares
+namespace DexterSlash.Middlewares
 {
     public class APIExceptionHandlingMiddleware
     {

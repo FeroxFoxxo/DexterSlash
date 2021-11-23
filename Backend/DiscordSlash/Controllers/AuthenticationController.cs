@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DiscordSlash.Controllers
+namespace DexterSlash.Controllers
 {
     [Route("api")]
     [ApiController]

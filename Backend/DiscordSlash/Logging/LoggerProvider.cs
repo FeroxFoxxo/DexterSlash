@@ -1,4 +1,4 @@
-﻿namespace DiscordSlash.Logging
+﻿namespace DexterSlash.Logging
 {
     public class LoggerProvider : ILoggerProvider
     {
