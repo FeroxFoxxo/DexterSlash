@@ -4,12 +4,12 @@ namespace DiscordSlash.Logging
     internal class ConsoleLogger : ILogger
     {
 
-        private string CategoryName;
-        private readonly LogLevel Level = LogLevel.Information;
+        private string _categoryName;
+        private readonly LogLevel _logLevel = LogLevel.Information;
 
         public ConsoleLogger(string categoryName)
         {
-            CategoryName = categoryName;
+            _categoryName = categoryName;
         }
 
         public IDisposable BeginScope<TState>(TState state)
@@ -19,12 +19,12 @@ namespace DiscordSlash.Logging
 
         public bool IsEnabled(LogLevel logLevel)
         {
-            return logLevel >= Level;
+            return logLevel >= _logLevel;
         }
 
         private bool IsBlocked(string message, LogLevel logLevel)
         {
-            if (CategoryName == "DSharpPlus.BaseDiscordClient")
+            if (_categoryName == "DSharpPlus.BaseDiscordClient")
             {
                 if (message.Contains("Pre-emptive ratelimit triggered - waiting until") && logLevel == LogLevel.Warning)
                 {
@@ -79,13 +79,13 @@ namespace DiscordSlash.Logging
                     break;
             }
 
-            if (CategoryName.StartsWith("DiscordSlash"))
+            if (_categoryName.StartsWith("DiscordSlash"))
             {
-                CategoryName = CategoryName.Split('.').Last();
+                _categoryName = _categoryName.Split('.').Last();
             }
 
             string currentTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
-            string prefix = $"[{currentTime}] [{shortLogLevel}] {CategoryName}[{eventId.Id}]: ";
+            string prefix = $"[{currentTime}] [{shortLogLevel}] {_categoryName}[{eventId.Id}]: ";
 
             Console.WriteLine($"{prefix}{message}");
 

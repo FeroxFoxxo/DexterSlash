@@ -1,28 +1,39 @@
-﻿using DiscordSlash.Exceptions;
+﻿using DiscordSlash.Enums;
+using DiscordSlash.Exceptions;
+using DiscordSlash.Services;
+using DSharpPlus.Entities;
 using Microsoft.AspNetCore.Authentication;
 
 namespace DiscordSlash.Identity
 {
     public class OAuthManager
     {
-        private readonly Dictionary<string, DiscordOAuth> Identities;
+        private readonly Dictionary<string, DiscordOAuth> _identities;
 
-        private readonly ILogger<OAuthManager> Logger;
+        private readonly ILogger<OAuthManager> _logger;
 
-        private readonly IServiceProvider ServiceProvider;
+        private readonly IServiceProvider _serviceProvider;
 
-        private readonly IServiceScopeFactory ServiceScopeFactory;
-
-        public OAuthManager(ILogger<OAuthManager> logger, IServiceProvider serviceProvider, IServiceScopeFactory serviceScopeFactory)
+        public OAuthManager(ILogger<OAuthManager> logger, IServiceProvider serviceProvider)
         {
-            Logger = logger;
-            ServiceProvider = serviceProvider;
-            ServiceScopeFactory = serviceScopeFactory;
+            _logger = logger;
+            _serviceProvider = serviceProvider;
 
-            Identities = new();
+            _identities = new();
         }
 
+
         public async Task<DiscordOAuth> GetIdentity(HttpContext httpContext)
+        {
+            DiscordOAuth identity = await GetOrCreateIdentity(httpContext);
+            if (identity == null)
+            {
+                throw new InvalidIdentityException();
+            }
+            return identity;
+        }
+
+        private async Task<DiscordOAuth> GetOrCreateIdentity(HttpContext httpContext)
         {
             string key = httpContext.Request.Cookies["dex_access_token"];
 
@@ -30,16 +41,17 @@ namespace DiscordSlash.Identity
             {
                 throw new UnauthorizedException();
             }
-            if (Identities.ContainsKey(key))
+
+            if (_identities.ContainsKey(key))
             {
-                DiscordOAuth identity = Identities[key];
+                DiscordOAuth identity = _identities[key];
                 if (identity.ValidUntil >= DateTime.UtcNow)
                 {
                     return identity;
                 }
                 else
                 {
-                    Identities.Remove(key);
+                    _identities.Remove(key);
                 }
             }
 
@@ -49,18 +61,24 @@ namespace DiscordSlash.Identity
         private async Task<DiscordOAuth> RegisterNewIdentity(HttpContext httpContext)
         {
             string key = string.Empty;
+            DiscordOAuth identity = null;
+            if (httpContext.Request.Headers.ContainsKey("Authorization"))
+            {
+            }
+            else
+            {
+                key = httpContext.Request.Cookies["dex_access_token"];
 
-            key = httpContext.Request.Cookies["dex_access_token"];
-            Logger.LogInformation("Registering new DiscordIdentity.");
-            string token = await httpContext.GetTokenAsync("Cookies", "access_token");
+                _logger.LogInformation("Registering new DiscordIdentity.");
 
-            IDiscordAPIInterface api = serviceProvider.GetService(typeof(IDiscordAPIInterface)) as IDiscordAPIInterface;
-            DiscordUser user = await api.FetchCurrentUserInfo(token, CacheBehavior.IgnoreButCacheOnError);
-            List<DiscordGuild> guilds = await api.FetchGuildsOfCurrentUser(token, CacheBehavior.IgnoreButCacheOnError);
+                string token = await httpContext.GetTokenAsync("Cookies", "access_token");
 
-            DiscordOAuth identity = new DiscordOAuth(user);
+                DiscordUser user = await _serviceProvider.GetService<RestBot>()
+                    .FetchCurrentUserInfo(token, CacheBehavior.IgnoreButCacheOnError);
 
-            Identities[key] = identity;
+                identity = new(user);
+            }
+            _identities[key] = identity;
             return identity;
         }
 

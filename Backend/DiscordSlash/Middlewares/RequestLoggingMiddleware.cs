@@ -2,13 +2,13 @@
 {
     public class RequestLoggingMiddleware
     {
-        private readonly RequestDelegate Next;
-        private readonly ILogger Logger;
+        private readonly RequestDelegate _next;
+        private readonly ILogger _logger;
 
         public RequestLoggingMiddleware(RequestDelegate next, ILoggerFactory loggerFactory)
         {
-            Next = next;
-            Logger = loggerFactory.CreateLogger<RequestLoggingMiddleware>();
+            _next = next;
+            _logger = loggerFactory.CreateLogger<RequestLoggingMiddleware>();
         }
 
         private string GetIP(HttpContext context)
@@ -35,7 +35,7 @@
             }
             catch (Exception e)
             {
-                Logger.LogError(e, "Error getting IP");
+                _logger.LogError(e, "Error getting IP");
                 return "";
             }
         }
@@ -71,13 +71,13 @@
 
             try
             {
-                Logger.LogInformation($"INC {method} {context.Request?.Path.Value}{context.Request?.QueryString} | {GetIP(context)}");
-                await Next(context);
-                Logger.LogInformation($"{context.Response?.StatusCode} {method} {context.Request?.Path.Value}");
+                _logger.LogInformation($"INC {method} {context.Request?.Path.Value}{context.Request?.QueryString} | {GetIP(context)}");
+                await _next(context);
+                _logger.LogInformation($"{context.Response?.StatusCode} {method} {context.Request?.Path.Value}");
             }
             catch (Exception e)
             {
-                Logger.LogError(e, $"500 {method} {context.Request?.Path.Value}");
+                _logger.LogError(e, $"500 {method} {context.Request?.Path.Value}");
                 throw;
             }
         }

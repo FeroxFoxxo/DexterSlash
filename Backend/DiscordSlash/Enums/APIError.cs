@@ -4,6 +4,8 @@
     {
         Unknown,
         ResourceNotFound,
-        Unauthorized
+        Unauthorized,
+        NotFoundInCache,
+        InvalidIdentity
     }
 }

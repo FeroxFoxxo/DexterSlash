@@ -13,6 +13,12 @@ namespace DiscordSlash.Database
         {
             configurationBuilder.Properties<ulong[]>().HaveConversion<ULAConverter>();
         }
+
+        public async Task<bool> CanConnectAsync()
+        {
+            return await Database.CanConnectAsync();
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ULAComparer ulongArrayComparer = new();

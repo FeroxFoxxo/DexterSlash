@@ -9,11 +9,11 @@ namespace DiscordSlash.Attributes
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public class RequireAttribute : SlashCheckBaseAttribute
     {
-        private readonly UserPermission UserPerm;
+        private readonly UserPermission _permissionLevel;
 
         public RequireAttribute(UserPermission permissionLevel)
         {
-			UserPerm = permissionLevel;
+			_permissionLevel = permissionLevel;
         }
 
         public override async Task<bool> ExecuteChecksAsync(InteractionContext ctx)
@@ -21,11 +21,12 @@ namespace DiscordSlash.Attributes
             if (ctx.Guild == null)
                 return false;
 
-            var guildConfig = await new GuildConfigRepository(ctx.Services).GetGuildConfig(ctx.Guild.Id);
+            var guildConfig = await new GuildConfigRepository(ctx.Services)
+				.GetGuildConfig(ctx.Guild.Id);
 
 			var currentPerm = GetPermissionLevel(ctx.Member, guildConfig);
 
-			return currentPerm == UserPerm;
+			return currentPerm == _permissionLevel;
 		}
 
 		public UserPermission GetPermissionLevel(DiscordMember user, GuildConfig config)

@@ -1,14 +1,12 @@
 ﻿using AspNetCoreRateLimit;
 using DiscordSlash.Database;
+using DiscordSlash.Identity;
 using DiscordSlash.Logging;
 using DiscordSlash.Middlewares;
 using DiscordSlash.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 namespace DiscordSlash
 {
@@ -16,10 +14,12 @@ namespace DiscordSlash
     {
 
         public IConfiguration Configuration { get; }
+        private IWebHostEnvironment CurrentEnvironment { get; set; }
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            CurrentEnvironment = env;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -35,13 +35,15 @@ namespace DiscordSlash
 
             services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-            services.AddHostedService<DiscordBot>();
+            services.AddSingleton<DiscordBot>();
+            services.AddSingleton<OAuthManager>();
+            services.AddSingleton<RestBot>();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie("Cookies", options =>
                 {
-                    options.LoginPath = "/api/login";
-                    options.LogoutPath = "/api/logout";
+                    options.LoginPath = "/api/v1/login";
+                    options.LogoutPath = "/api/v1/logout";
                     options.ExpireTimeSpan = new TimeSpan(7, 0, 0, 0);
                     options.Cookie.MaxAge = new TimeSpan(7, 0, 0, 0);
                     options.Cookie.Name = "dex_access_token";
@@ -67,12 +69,23 @@ namespace DiscordSlash
                     options.CorrelationCookie.HttpOnly = false;
                 });
 
+
             services.AddAuthorization(options =>
             {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder("Cookies", "Tokens")
+                options.DefaultPolicy = new AuthorizationPolicyBuilder("Cookies")
                     .RequireAuthenticatedUser()
                     .Build();
             });
+
+            if (CurrentEnvironment.IsDevelopment()) {
+                services.AddCors(o => o.AddPolicy("AngularDevCors", builder =>
+                {
+                    builder.WithOrigins("http://127.0.0.1:4200")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                }));
+            }
 
             // Stores rate limit counters and ip rules.
             services.AddMemoryCache();
@@ -102,16 +115,18 @@ namespace DiscordSlash
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddProvider(new LoggerProvider());
 
-            if (env.IsDevelopment())
+            if (CurrentEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
 
                 app.UseSwagger();
                 app.UseSwaggerUI();
+
+                app.UseCors("AngularDevCors");
             }
 
             app.UseMiddleware<APIExceptionHandlingMiddleware>();
@@ -123,6 +138,8 @@ namespace DiscordSlash
             using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 scope.ServiceProvider.GetRequiredService<DatabaseContext>().Database.Migrate();
+
+                _ = scope.ServiceProvider.GetRequiredService<DiscordBot>().StartAsync();
             }
 
             app.UseHttpsRedirection();

@@ -7,7 +7,9 @@
             return new ConsoleLogger(categoryName);
         }
 
-        public void Dispose() { }
+        public void Dispose() {
+            GC.SuppressFinalize(this);
+        }
 
     }
 }

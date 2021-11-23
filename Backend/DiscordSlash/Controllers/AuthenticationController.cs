@@ -10,10 +10,16 @@ namespace DiscordSlash.Controllers
     public class AuthenticationController : ControllerBase
     {
         [HttpGet("login")]
-        public IActionResult Login()
+        public IActionResult Login([FromQuery] string ReturnUrl)
         {
+            if (string.IsNullOrEmpty(ReturnUrl))
+            {
+                ReturnUrl = "/api/status";
+            }
+
             var properties = new AuthenticationProperties()
             {
+                RedirectUri = ReturnUrl,
                 Items =
                 {
                     { "LoginProvider", "Discord" },
@@ -30,7 +36,6 @@ namespace DiscordSlash.Controllers
         {
             var properties = new AuthenticationProperties()
             {
-                RedirectUri = "/",
                 Items =
                 {
                     { "LoginProvider", "Discord" },

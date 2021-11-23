@@ -6,6 +6,7 @@ namespace DiscordSlash.Identity
     {
 
         public readonly DateTime ValidUntil;
+
         public readonly DiscordUser CurrentUser;
 
         public DiscordOAuth(DiscordUser currentUser)

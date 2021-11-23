@@ -5,20 +5,20 @@ namespace DiscordSlash.Middlewares
 {
     public class APIExceptionHandlingMiddleware
     {
-        private readonly RequestDelegate Next;
-        private readonly ILogger Logger;
+        private readonly RequestDelegate _next;
+        private readonly ILogger _logger;
 
         public APIExceptionHandlingMiddleware(RequestDelegate next, ILoggerFactory loggerFactory)
         {
-            Next = next;
-            Logger = loggerFactory.CreateLogger<APIExceptionHandlingMiddleware>();
+            _next = next;
+            _logger = loggerFactory.CreateLogger<APIExceptionHandlingMiddleware>();
         }
 
         public async Task Invoke(HttpContext context)
         {
             try
             {
-                await Next(context);
+                await _next(context);
             }
             catch (BaseAPIException ex)
             {
@@ -35,9 +35,9 @@ namespace DiscordSlash.Middlewares
                     context.Response.StatusCode = 404;
                 }
 
-                Logger.LogWarning($"Encountered API error type {ex.Error}, message: " + message);
+                _logger.LogWarning($"Encountered API error type {ex.Error}, message: " + message);
                 context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(JsonConvert.SerializeObject(new { customError = ex.Error, message = message }));
+                await context.Response.WriteAsync(JsonConvert.SerializeObject(new { customError = ex.Error, message }));
             }
         }
     }

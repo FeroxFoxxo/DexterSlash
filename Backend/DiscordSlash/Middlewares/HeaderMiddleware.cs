@@ -2,17 +2,17 @@
 {
     public class HeaderMiddleware
     {
-        private readonly RequestDelegate Next;
+        private readonly RequestDelegate _next;
 
         public HeaderMiddleware(RequestDelegate next)
         {
-            Next = next;
+            _next = next;
         }
 
         public async Task Invoke(HttpContext context)
         {
             context.Request.Headers["Host"] = Environment.GetEnvironmentVariable("SERVICE_DOMAIN");
-            await Next(context);
+            await _next(context);
         }
     }
 }

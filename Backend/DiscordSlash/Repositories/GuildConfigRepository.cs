@@ -10,7 +10,7 @@ namespace DiscordSlash.Repositories
 
         public async Task<GuildConfig> GetGuildConfig(ulong guildId)
         {
-            GuildConfig guildConfig = await Context.GuildConfigs.AsQueryable().FirstOrDefaultAsync(x => x.GuildId == guildId);
+            GuildConfig guildConfig = await _context.GuildConfigs.AsQueryable().FirstOrDefaultAsync(x => x.GuildId == guildId);
 
             if (guildConfig == null)
             {

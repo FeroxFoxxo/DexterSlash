@@ -11,16 +11,16 @@ using System.Text;
 
 namespace DiscordSlash.Services
 {
-    public class DiscordBot : IHostedService
+    public class DiscordBot
     {
-        private readonly ILogger<DiscordBot> logger;
-        private readonly DiscordClient client;
-        private bool isRunning = false;
-        private DateTime? lastDisconnect = null;
+        private readonly ILogger<DiscordBot> _logger;
+        private readonly DiscordClient _client;
+        private bool _isRunning = false;
+        private DateTime? _lastDisconnect = null;
 
         public DiscordBot(ILogger<DiscordBot> logger, IServiceProvider serviceProvider)
         {
-            this.logger = logger;
+            _logger = logger;
 
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddProvider(new LoggerProvider());
@@ -31,16 +31,16 @@ namespace DiscordSlash.Services
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers,
                 LoggerFactory = loggerFactory,
-                MessageCacheSize = 10240
+                MessageCacheSize = 1024
             };
 
-            client = new DiscordClient(discordConfiguration);
+            _client = new DiscordClient(discordConfiguration);
 
-            client.SocketErrored += SocketErroredHandler;
-            client.Resumed += ResumedHandler;
-            client.Ready += ReadyHandler;
+            _client.SocketErrored += SocketErroredHandler;
+            _client.Resumed += ResumedHandler;
+            _client.Ready += ReadyHandler;
 
-            var slash = client.UseSlashCommands(new SlashCommandsConfiguration
+            var slash = _client.UseSlashCommands(new SlashCommandsConfiguration
             {
                 Services = serviceProvider
             });
@@ -52,8 +52,8 @@ namespace DiscordSlash.Services
 
         private Task ResumedHandler(DiscordClient sender, ReadyEventArgs e)
         {
-            logger.LogWarning("Client reconnected.");
-            isRunning = true;
+            _logger.LogWarning("Client reconnected.");
+            _isRunning = true;
             return Task.CompletedTask;
         }
 
@@ -61,17 +61,17 @@ namespace DiscordSlash.Services
         {
             if (e.Exception is WebSocketException)
             {
-                logger.LogCritical("Client disconnected.");
-                isRunning = false;
-                lastDisconnect = DateTime.UtcNow;
+                _logger.LogCritical("Client disconnected.");
+                _isRunning = false;
+                _lastDisconnect = DateTime.UtcNow;
             }
             return Task.CompletedTask;
         }
 
         private Task ReadyHandler(DiscordClient sender, ReadyEventArgs e)
         {
-            logger.LogInformation("Client connected.");
-            isRunning = true;
+            _logger.LogInformation("Client connected.");
+            _isRunning = true;
 
             return Task.CompletedTask;
         }
@@ -80,7 +80,7 @@ namespace DiscordSlash.Services
         {
             if (e.Exception is BaseAPIException baseException)
             {
-                logger.LogError($"Command '{e.Context.CommandName}' invoked by '{e.Context.User.Username}#{e.Context.User.Discriminator}' failed: {(e.Exception as BaseAPIException).Error}");
+                _logger.LogError($"Command '{e.Context.CommandName}' invoked by '{e.Context.User.Username}#{e.Context.User.Discriminator}' failed: {(e.Exception as BaseAPIException).Error}");
 
                 string errorCode = "0#" + ((int)baseException.Error).ToString("D7");
 
@@ -101,28 +101,28 @@ namespace DiscordSlash.Services
             }
             else
             {
-                logger.LogError($"Command '{e.Context.CommandName}' invoked by '{e.Context.User.Username}#{e.Context.User.Discriminator}' failed: " + e.Exception.Message + "\n" + e.Exception.StackTrace);
+                _logger.LogError($"Command '{e.Context.CommandName}' invoked by '{e.Context.User.Username}#{e.Context.User.Discriminator}' failed: " + e.Exception.Message + "\n" + e.Exception.StackTrace);
             }
         }
 
         public DateTime? GetLastDisconnectTime()
         {
-            return lastDisconnect;
+            return _lastDisconnect;
         }
 
         public bool IsRunning()
         {
-            return isRunning;
+            return _isRunning;
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public int GetPing()
         {
-            await client.ConnectAsync();
+            return _client.Ping;
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public async Task StartAsync()
         {
-            await client.DisconnectAsync();
+            await _client.ConnectAsync();
         }
     }
 }

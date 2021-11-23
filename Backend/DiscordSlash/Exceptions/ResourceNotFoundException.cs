@@ -7,6 +7,7 @@ namespace DiscordSlash.Exceptions
         public ResourceNotFoundException(string message) : base(message, APIError.ResourceNotFound)
         {
         }
+
         public ResourceNotFoundException() : base("Resource not found.", APIError.ResourceNotFound)
         {
         }
