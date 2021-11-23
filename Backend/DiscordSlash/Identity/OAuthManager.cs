@@ -1,6 +1,6 @@
 ﻿using DexterSlash.Enums;
 using DexterSlash.Exceptions;
-using DexterSlash.Services;
+using Discord;
 using Discord.Rest;
 using Microsoft.AspNetCore.Authentication;
 
@@ -12,16 +12,48 @@ namespace DexterSlash.Identity
 
         private readonly ILogger<OAuthManager> _logger;
 
-        private readonly IServiceProvider _serviceProvider;
+        private readonly Dictionary<string, CacheApiResponse> _cache;
 
-        public OAuthManager(ILogger<OAuthManager> logger, IServiceProvider serviceProvider)
+        public OAuthManager(ILogger<OAuthManager> logger)
         {
             _logger = logger;
-            _serviceProvider = serviceProvider;
 
             _identities = new();
+            _cache = new ();
         }
 
+        public async Task<DiscordRestClient> FetchCurrentUserInfo(string token, CacheBehavior cacheBehavior)
+        {
+            CacheKey cacheKey = CacheKey.TokenUser(token);
+            DiscordRestClient user = null;
+
+            try
+            {
+                user = TryGetFromCache<DiscordRestClient>(cacheKey, cacheBehavior);
+                if (user != null) return user;
+            }
+            catch (NotFoundInCacheException)
+            {
+                return user;
+            }
+
+            try
+            {
+                _logger.LogError(token);
+
+                user = new DiscordRestClient();
+
+                await user.LoginAsync(TokenType.Bearer, token);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, $"Failed to fetch current user for token '{token}' from API.");
+                return FallBackToCache<DiscordRestClient>(cacheKey, cacheBehavior);
+            }
+            _cache[cacheKey.Key] = new CacheApiResponse(user);
+
+            return user;
+        }
 
         public async Task<DiscordOAuth> GetIdentity(HttpContext httpContext)
         {
@@ -66,13 +98,51 @@ namespace DexterSlash.Identity
 
             string token = await httpContext.GetTokenAsync("Cookies", "access_token");
 
-            DiscordRestClient user = await _serviceProvider.GetService<RestBot>()
-                .FetchCurrentUserInfo(token, CacheBehavior.IgnoreButCacheOnError);
+            DiscordRestClient user = await FetchCurrentUserInfo(token, CacheBehavior.IgnoreButCacheOnError);
 
             DiscordOAuth identity = new(user);
             _identities[key] = identity;
             return identity;
         }
 
+        private T TryGetFromCache<T>(CacheKey cacheKey, CacheBehavior cacheBehavior)
+        {
+            if (cacheBehavior == CacheBehavior.OnlyCache)
+            {
+                if (_cache.ContainsKey(cacheKey.Key))
+                {
+                    return _cache[cacheKey.Key].GetContent<T>();
+                }
+                else
+                {
+                    throw new NotFoundInCacheException(cacheKey.Key);
+                }
+            }
+            if (_cache.ContainsKey(cacheKey.Key) && cacheBehavior == CacheBehavior.Default)
+            {
+                if (!_cache[cacheKey.Key].IsExpired())
+                {
+                    return _cache[cacheKey.Key].GetContent<T>();
+                }
+                _cache.Remove(cacheKey.Key);
+            }
+            return default;
+        }
+
+        private T FallBackToCache<T>(CacheKey cacheKey, CacheBehavior cacheBehavior)
+        {
+            if (cacheBehavior != CacheBehavior.IgnoreCache)
+            {
+                if (_cache.ContainsKey(cacheKey.Key))
+                {
+                    if (!_cache[cacheKey.Key].IsExpired())
+                    {
+                        return _cache[cacheKey.Key].GetContent<T>();
+                    }
+                    _cache.Remove(cacheKey.Key);
+                }
+            }
+            return default;
+        }
     }
 }

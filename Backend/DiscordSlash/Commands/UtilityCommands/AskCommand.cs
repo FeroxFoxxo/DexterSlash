@@ -13,14 +13,14 @@ namespace DexterSlash.Commands.UtilityCommands
 		/// <summary>
 		/// Evaluates a mathematical expression and gives a result or throws an error.
 		/// </summary>
-		/// <param name="Question">A properly formatted stringified math expression.</param>
+		/// <param name="question">A properly formatted stringified math expression.</param>
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		[SlashCommand("ask", "Evaluates mathematical expressions and answers questions!")]
 
-		public async Task WolframCommand([Remainder] string Question)
+		public async Task WolframCommand([Remainder] string question)
 		{
-			string Response = await WolframAlphaClient.SpokenResultAsync(Question);
+			string Response = await WolframAlphaClient.SpokenResultAsync(question);
 
 			Response = Response.Replace("Wolfram Alpha", Context.Client.CurrentUser.Username);
 			Response = Response.Replace("Wolfram|Alpha", Context.Client.CurrentUser.Username);

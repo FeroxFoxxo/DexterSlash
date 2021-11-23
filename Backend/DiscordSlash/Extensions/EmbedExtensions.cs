@@ -95,7 +95,7 @@ namespace DexterSlash.Extensions
 			int Index = methodName.IndexOf(">d__");
 
 			if (Index != -1)
-				methodName = methodName.Substring(0, Index).Replace("<", "");
+				methodName = methodName[..Index].Replace("<", "");
 
 			return new KeyValuePair<string, string>(name, methodName);
 		}

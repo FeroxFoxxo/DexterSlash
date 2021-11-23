@@ -29,12 +29,6 @@ namespace DexterSlash
                     };
                     config.Token = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN");
                 })
-                .UseCommandService((context, config) =>
-                {
-                    config.DefaultRunMode = RunMode.Async;
-                    config.LogLevel = LogSeverity.Debug;
-                    config.CaseSensitiveCommands = false;
-                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

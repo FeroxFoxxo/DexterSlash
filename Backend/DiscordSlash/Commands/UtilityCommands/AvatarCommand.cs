@@ -13,23 +13,23 @@ namespace DexterSlash.Commands.UtilityCommands
 		/// <summary>
 		/// Sends in the target user's profile picture as a full-resolution image. If no user is provided, defaults to Context.User.
 		/// </summary>
-		/// <param name="User">The target user, default to Context.User.</param>
+		/// <param name="user">The target user, default to Context.User.</param>
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		[Command("avatar")]
 		[Summary("Gets the avatar of a user mentioned or yours.")]
 		
-		public async Task SendAvatar([Optional] IUser User)
+		public async Task SendAvatar([Optional] IUser user)
 		{
-			if (User == null)
-				User = Context.User;
+			if (user == null)
+				user = Context.User;
 
 			await RespondAsync(
 				embed:
 					CreateEmbed(EmojiEnum.Unknown)
-					.WithImageUrl(User.GetAvatarUrl(1024))
-					.WithUrl(User.GetAvatarUrl(1024))
-					.WithAuthor(User)
+					.WithImageUrl(user.GetAvatarUrl(1024))
+					.WithUrl(user.GetAvatarUrl(1024))
+					.WithAuthor(user)
 					.WithTitle("Get Avatar URL")
 					.Build()
 				);

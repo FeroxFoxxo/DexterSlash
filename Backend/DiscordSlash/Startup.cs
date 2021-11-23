@@ -1,9 +1,9 @@
 ﻿using AspNetCoreRateLimit;
 using DexterSlash.Databases.Context;
+using DexterSlash.Events;
 using DexterSlash.Identity;
 using DexterSlash.Logging;
 using DexterSlash.Middlewares;
-using DexterSlash.Services;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -11,6 +11,7 @@ using Genbox.WolframAlpha;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace DexterSlash
 {
@@ -39,7 +40,6 @@ namespace DexterSlash
             services.AddDbContext<DatabaseContext>(x => x.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
             services.AddSingleton<OAuthManager>();
-            services.AddSingleton<RestBot>();
 
             services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordShardedClient>(), new InteractionServiceConfig()
             {
@@ -49,6 +49,12 @@ namespace DexterSlash
             }));
 
             services.AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")));
+
+            services.Scan(scan => scan
+                .FromAssemblyOf<IEvent>()
+                .AddClasses(classes => classes.InNamespaces("DexterSlash.Events"))
+                .AsImplementedInterfaces()
+                .WithSingletonLifetime());
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie("Cookies", options =>
@@ -149,7 +155,12 @@ namespace DexterSlash
             using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 scope.ServiceProvider.GetRequiredService<DatabaseContext>().Database.Migrate();
+
+                scope.ServiceProvider.GetRequiredService<InteractionService>()
+                    .AddModulesAsync(Assembly.GetEntryAssembly(), scope.ServiceProvider);
             }
+
+            app.ApplicationServices.GetServices<IEvent>().ToList().ForEach(eventI => eventI.Initialize());
 
             app.UseHttpsRedirection();
 
