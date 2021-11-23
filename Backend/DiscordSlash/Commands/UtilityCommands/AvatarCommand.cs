@@ -1,14 +1,13 @@
 ﻿using Dexter.Enums;
 using DexterSlash.Extensions;
 using Discord;
-using Discord.Commands;
 using Discord.Interactions;
 using System.Runtime.InteropServices;
 
 namespace DexterSlash.Commands.UtilityCommands
 {
 
-	public class AvatarCommand : BaseCommand<AvatarCommand>
+    public class AvatarCommand : BaseCommand<AvatarCommand>
 	{
 
 		/// <summary>

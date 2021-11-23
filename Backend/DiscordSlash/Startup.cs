@@ -2,7 +2,6 @@
 using DexterSlash.Databases.Context;
 using DexterSlash.Events;
 using DexterSlash.Identity;
-using DexterSlash.Logging;
 using DexterSlash.Middlewares;
 using Discord;
 using Discord.Interactions;
@@ -140,10 +139,8 @@ namespace DexterSlash
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
-            loggerFactory.AddProvider(new LoggerProvider());
-
             if (CurrentEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

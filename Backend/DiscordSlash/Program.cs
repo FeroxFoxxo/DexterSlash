@@ -1,4 +1,6 @@
-﻿namespace DexterSlash
+﻿using DexterSlash.Logging;
+
+namespace DexterSlash
 {
     public class Program
     {
@@ -12,6 +14,7 @@
                 .ConfigureLogging(logging =>
                 {
                     logging.ClearProviders();
+                    logging.AddProvider(new LoggerProvider());
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
