@@ -37,24 +37,29 @@ namespace DexterSlash
                                       $"Uid={      Environment.GetEnvironmentVariable("MYSQL_USER")};" +
                                       $"Pwd={      Environment.GetEnvironmentVariable("MYSQL_PASSWORD")};";
 
-            services.AddDbContext<DatabaseContext>(x => x.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+            services
 
-            services.AddSingleton<OAuthManager>();
+                .AddSingleton<DiscordShardedClient>()
 
-            services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordShardedClient>(), new InteractionServiceConfig()
-            {
-                DefaultRunMode = RunMode.Async,
-                LogLevel = LogSeverity.Debug,
-                UseCompiledLambda = true
-            }));
+                .AddDbContext<DatabaseContext>(x => x.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)))
 
-            services.AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")));
+                .AddSingleton<OAuthManager>()
 
-            services.Scan(scan => scan
-                .FromAssemblyOf<IEvent>()
-                .AddClasses(classes => classes.InNamespaces("DexterSlash.Events"))
-                .AsImplementedInterfaces()
-                .WithSingletonLifetime());
+                .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordShardedClient>(), new InteractionServiceConfig()
+                {
+                    DefaultRunMode = RunMode.Async,
+                    LogLevel = LogSeverity.Debug,
+                    UseCompiledLambda = true
+                }))
+
+                .AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")))
+
+                .Scan(scan => scan
+                    .FromAssemblyOf<IEvent>()
+                    .AddClasses(classes => classes.InNamespaces("DexterSlash.Events"))
+                    .AsImplementedInterfaces()
+                    .WithSingletonLifetime()
+                );
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie("Cookies", options =>
@@ -86,13 +91,12 @@ namespace DexterSlash
                     options.CorrelationCookie.HttpOnly = false;
                 });
 
-
             services.AddAuthorization(options =>
-            {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder("Cookies")
-                    .RequireAuthenticatedUser()
-                    .Build();
-            });
+                {
+                    options.DefaultPolicy = new AuthorizationPolicyBuilder("Cookies")
+                        .RequireAuthenticatedUser()
+                        .Build();
+                });
 
             if (CurrentEnvironment.IsDevelopment()) {
                 services.AddCors(o => o.AddPolicy("AngularDevCors", builder =>
@@ -105,30 +109,32 @@ namespace DexterSlash
             }
 
             // Stores rate limit counters and ip rules.
-            services.AddMemoryCache();
-            
-            services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
+            services
+                .AddMemoryCache()
+
+                .AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>()
 
             // Loads general configuration from appsettings.json
-            services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
+                .Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"))
 
             // Load IP rules from appsettings.json.
-            services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
+                .Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"))
 
             // Injects counter and rules stores.
-            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
-            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+                .AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>()
 
-            services.AddMvc();
+                .AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>()
 
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+                .AddMvc();
+
+            services.AddEndpointsApiExplorer()
+                .AddSwaggerGen()
 
             // The IHttpContextAccessor service is not registered by default, though the clientId/clientIp resolvers use it.
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+                .AddSingleton<IHttpContextAccessor, HttpContextAccessor>()
 
             // Configuration (resolvers, counter key builders).
-            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+                .AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -155,9 +161,6 @@ namespace DexterSlash
             using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 scope.ServiceProvider.GetRequiredService<DatabaseContext>().Database.Migrate();
-
-                scope.ServiceProvider.GetRequiredService<InteractionService>()
-                    .AddModulesAsync(Assembly.GetEntryAssembly(), scope.ServiceProvider);
             }
 
             app.ApplicationServices.GetServices<IEvent>().ToList().ForEach(eventI => eventI.Initialize());
@@ -173,6 +176,20 @@ namespace DexterSlash
             {
                 endpoints.MapControllers();
             });
+
+            _ = Login(app.ApplicationServices);
         }
+
+        public async Task Login(IServiceProvider services)
+        {
+            await services.GetRequiredService<InteractionService>()
+                .AddModulesAsync(Assembly.GetEntryAssembly(), services);
+
+            var client = services.GetRequiredService<DiscordShardedClient>();
+
+            await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN"));
+            await client.StartAsync();
+        }
+
     }
 }

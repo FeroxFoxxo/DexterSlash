@@ -1,14 +1,13 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using Discord.Interactions;
 using Genbox.WolframAlpha;
 
 namespace DexterSlash.Commands.UtilityCommands
 {
-	public class AskCommand : BaseCommand<AskCommand>
+    public class AskCommand : BaseCommand<AskCommand>
 	{
 
-		public WolframAlphaClient WolframAlphaClient;
+		public WolframAlphaClient WolframAlphaClient { get; set; }
 
 		/// <summary>
 		/// Evaluates a mathematical expression and gives a result or throws an error.
@@ -18,7 +17,7 @@ namespace DexterSlash.Commands.UtilityCommands
 
 		[SlashCommand("ask", "Evaluates mathematical expressions and answers questions!")]
 
-		public async Task WolframCommand([Remainder] string question)
+		public async Task WolframCommand(string question)
 		{
 			string Response = await WolframAlphaClient.SpokenResultAsync(question);
 

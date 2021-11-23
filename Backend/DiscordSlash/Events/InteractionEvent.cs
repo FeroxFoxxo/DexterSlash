@@ -11,12 +11,12 @@ namespace DexterSlash.Events
         private readonly IServiceProvider _services;
         private readonly ILogger<InteractionEvent> _logger;
 
-        public InteractionEvent(ILogger<InteractionEvent> i, DiscordShardedClient client, InteractionService commands, IServiceProvider services)
+        public InteractionEvent(ILogger<InteractionEvent> logger, DiscordShardedClient client, InteractionService commands, IServiceProvider services)
         {
             _client = client;
             _commands = commands;
             _services = services;
-            _logger = i;
+            _logger = logger;
         }
 
         public void Initialize()
@@ -29,8 +29,17 @@ namespace DexterSlash.Events
 
             _client.ShardReady += async (_) =>
             {
-                _logger.LogError("HI");
-                await _commands.RegisterCommandsToGuildAsync(613441321751019550);
+                _logger.LogInformation("Initializing guild commands.");
+                
+                try
+                {
+                    await _commands.RegisterCommandsToGuildAsync(613441321751019550);
+                    _logger.LogInformation("Sucessfully initialized commands!");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Failed to initialize guild commands!\n{ex}");
+                }
             };
         }
 

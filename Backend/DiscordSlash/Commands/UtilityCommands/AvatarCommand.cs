@@ -2,6 +2,7 @@
 using DexterSlash.Extensions;
 using Discord;
 using Discord.Commands;
+using Discord.Interactions;
 using System.Runtime.InteropServices;
 
 namespace DexterSlash.Commands.UtilityCommands
@@ -16,8 +17,7 @@ namespace DexterSlash.Commands.UtilityCommands
 		/// <param name="user">The target user, default to Context.User.</param>
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		[Command("avatar")]
-		[Summary("Gets the avatar of a user mentioned or yours.")]
+		[SlashCommand("avatar", "Gets the avatar of a user mentioned or yours.")]
 		
 		public async Task SendAvatar([Optional] IUser user)
 		{
