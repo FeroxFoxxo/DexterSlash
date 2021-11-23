@@ -4,6 +4,10 @@ using DexterSlash.Identity;
 using DexterSlash.Logging;
 using DexterSlash.Middlewares;
 using DexterSlash.Services;
+using Discord;
+using Discord.Interactions;
+using Discord.WebSocket;
+using Genbox.WolframAlpha;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +17,9 @@ namespace DexterSlash
     public class Startup
     {
 
-        public IConfiguration Configuration { get; }
-        private IWebHostEnvironment CurrentEnvironment { get; set; }
+        private readonly IConfiguration Configuration;
+
+        private readonly IWebHostEnvironment CurrentEnvironment;
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
@@ -35,6 +40,15 @@ namespace DexterSlash
 
             services.AddSingleton<OAuthManager>();
             services.AddSingleton<RestBot>();
+
+            services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordShardedClient>(), new InteractionServiceConfig()
+            {
+                DefaultRunMode = RunMode.Async,
+                LogLevel = LogSeverity.Debug,
+                UseCompiledLambda = true
+            }));
+
+            services.AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")));
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie("Cookies", options =>

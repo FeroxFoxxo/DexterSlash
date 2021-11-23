@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.31911.260
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DexterSlash", "DiscordSlash\DexterSlash.csproj", "{243B8E59-8A2E-4BAB-AF5E-D936C832FE19}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{26BDE2D2-738B-4088-8C41-48D90831F8E2}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		..\.gitattributes = ..\.gitattributes
+		..\.gitignore = ..\.gitignore
+		..\CODE_OF_CONDUCT.md = ..\CODE_OF_CONDUCT.md
+		..\LICENSE = ..\LICENSE
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{243B8E59-8A2E-4BAB-AF5E-D936C832FE19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{243B8E59-8A2E-4BAB-AF5E-D936C832FE19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{243B8E59-8A2E-4BAB-AF5E-D936C832FE19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{243B8E59-8A2E-4BAB-AF5E-D936C832FE19}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {603CD14C-8864-494B-8478-D03C4692AC74}
+	EndGlobalSection
+EndGlobal
