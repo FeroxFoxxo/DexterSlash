@@ -45,12 +45,14 @@ namespace DexterSlash
 
                 .AddSingleton<OAuthManager>()
 
-                .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordShardedClient>(), new InteractionServiceConfig()
+                .AddSingleton(new InteractionServiceConfig
                 {
                     DefaultRunMode = RunMode.Async,
                     LogLevel = LogSeverity.Debug,
                     UseCompiledLambda = true
-                }))
+                })
+
+                .AddSingleton<InteractionService>()
 
                 .AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")))
 
