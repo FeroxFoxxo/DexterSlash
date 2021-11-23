@@ -60,24 +60,16 @@ namespace DiscordSlash.Identity
 
         private async Task<DiscordOAuth> RegisterNewIdentity(HttpContext httpContext)
         {
-            string key = string.Empty;
-            DiscordOAuth identity = null;
-            if (httpContext.Request.Headers.ContainsKey("Authorization"))
-            {
-            }
-            else
-            {
-                key = httpContext.Request.Cookies["dex_access_token"];
+            string key = httpContext.Request.Cookies["dex_access_token"];
 
-                _logger.LogInformation("Registering new DiscordIdentity.");
+            _logger.LogInformation("Registering new DiscordIdentity.");
 
-                string token = await httpContext.GetTokenAsync("Cookies", "access_token");
+            string token = await httpContext.GetTokenAsync("Cookies", "access_token");
 
-                DiscordUser user = await _serviceProvider.GetService<RestBot>()
-                    .FetchCurrentUserInfo(token, CacheBehavior.IgnoreButCacheOnError);
+            DiscordUser user = await _serviceProvider.GetService<RestBot>()
+                .FetchCurrentUserInfo(token, CacheBehavior.IgnoreButCacheOnError);
 
-                identity = new(user);
-            }
+            DiscordOAuth identity = new(user);
             _identities[key] = identity;
             return identity;
         }
