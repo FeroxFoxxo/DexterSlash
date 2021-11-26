@@ -67,7 +67,6 @@ namespace DexterSlash.Extensions
 				.WithFooter($"USFurries {name} Module");
 		}
 
-
 		/// <summary>
 		/// Gets the class of the last method that had been called.
 		/// </summary>
