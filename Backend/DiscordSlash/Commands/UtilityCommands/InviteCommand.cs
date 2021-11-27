@@ -1,4 +1,4 @@
-﻿using Dexter.Enums;
+﻿using DexterSlash.Attributes;
 using DexterSlash.Commands;
 using Discord;
 using Discord.Interactions;
@@ -10,6 +10,7 @@ namespace Dexter.Commands
 	{
 
 		[SlashCommand("invite", "Gets the bot's invite link.")]
+		[Global]
 
 		public async Task Invite()
 		{

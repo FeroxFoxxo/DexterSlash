@@ -1,5 +1,6 @@
-﻿using Dexter.Enums;
+﻿using DexterSlash.Attributes;
 using DexterSlash.Commands;
+using DexterSlash.Enums;
 using Discord;
 using Discord.Interactions;
 
@@ -10,8 +11,9 @@ namespace Dexter.Commands
 	{
 
 		[SlashCommand("leaderboard", "Gets the link to the server's experience leaderboard.")]
+		[EnabledBy(Modules.Leveling)]
 
-		public async Task Invite()
+		public async Task Leaderboard()
 		{
 			var button = new ComponentBuilder()
 				.WithButton(

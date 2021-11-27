@@ -1,4 +1,5 @@
-﻿using Discord.Interactions;
+﻿using DexterSlash.Attributes;
+using Discord.Interactions;
 using Genbox.WolframAlpha;
 
 namespace DexterSlash.Commands.UtilityCommands
@@ -15,6 +16,7 @@ namespace DexterSlash.Commands.UtilityCommands
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		[SlashCommand("ask", "Evaluates mathematical expressions and answers questions!")]
+		[Global]
 
 		public async Task WolframCommand(string question)
 		{

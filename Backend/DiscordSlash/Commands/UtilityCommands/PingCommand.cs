@@ -1,4 +1,5 @@
 ﻿using Dexter.Enums;
+using DexterSlash.Attributes;
 using DexterSlash.Commands;
 using Discord.Interactions;
 
@@ -14,6 +15,7 @@ namespace Dexter.Commands
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		[SlashCommand("latency", "Gets the estimate round-trip latency to the gateway server.")]
+		[Global]
 
 		public async Task Ping()
 		{

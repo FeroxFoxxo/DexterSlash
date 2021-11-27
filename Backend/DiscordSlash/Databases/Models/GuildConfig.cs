@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DexterSlash.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace DexterSlash.Databases.Models
 {
@@ -7,17 +8,7 @@ namespace DexterSlash.Databases.Models
         [Key]
         public ulong GuildId { get; set; }
 
-        public ulong[] DJRoles { get; set; }
-
-        public ulong[] ElevatedRoles { get; set; }
-
-        public ulong[] WelcomerRoles { get; set; }
-
-        public ulong[] ModRoles { get; set; }
-
-        public ulong[] AdminRoles { get; set; }
-
-        public ulong[] MutedRoles { get; set; }
+        public Modules EnabledModules { get; set; }
 
         public string ModInternalNotificationWebhook { get; set; }
 
