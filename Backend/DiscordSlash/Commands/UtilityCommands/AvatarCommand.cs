@@ -1,4 +1,5 @@
 ﻿using Dexter.Enums;
+using DexterSlash.Attributes;
 using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
@@ -16,7 +17,8 @@ namespace DexterSlash.Commands.UtilityCommands
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		[SlashCommand("avatar", "Gets the avatar of a user mentioned or yours.")]
-		
+		[Global]
+
 		public async Task SendAvatar(IUser user = null)
 		{
 			if (user == null)

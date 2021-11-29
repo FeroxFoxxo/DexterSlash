@@ -1,4 +1,5 @@
 ﻿using Dexter.Enums;
+using DexterSlash.Attributes;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -46,8 +47,10 @@ namespace DexterSlash.Events
 
                 try
                 {
-                    foreach (var guild in shard.Guilds)
-                        await _commands.RegisterCommandsToGuildAsync(guild.Id);
+                    await _commands.AddCommandsGloballyAsync(
+                        true,
+                        _commands.SlashCommands.Where(x => x.Attributes.Where(x => x is GlobalAttribute).Any()).ToArray()
+                    );
 
                     _logger.LogInformation("Sucessfully initialized global commands!");
                 }
@@ -62,7 +65,11 @@ namespace DexterSlash.Events
             try
             {
                 foreach (var guild in shard.Guilds)
-                    await _commands.RegisterCommandsToGuildAsync(guild.Id);
+                    await _commands.AddCommandsToGuildAsync(
+                        guild,
+                        true,
+                        _commands.SlashCommands.Where(x => !x.Attributes.Where(x => x is GlobalAttribute).Any()).ToArray()
+                    );
 
                 _logger.LogInformation($"Sucessfully initialized commands for shard {shard.ShardId}!");
             }

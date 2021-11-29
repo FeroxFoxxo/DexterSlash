@@ -23,7 +23,7 @@ namespace Dexter.Commands
 				)
 				.Build();
 
-			await RespondAsync("Leaderboard mode, activate! 💥", component: button, ephemeral: true);
+			await RespondAsync("Leaderboard mode, activate! 💥", component: button);
 		}
 
 	}
