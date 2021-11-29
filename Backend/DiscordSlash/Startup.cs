@@ -3,6 +3,7 @@ using DexterSlash.Databases.Context;
 using DexterSlash.Events;
 using DexterSlash.Identity;
 using DexterSlash.Middlewares;
+using DexterSlash.Workers;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -40,10 +41,6 @@ namespace DexterSlash
 
                 .AddSingleton<DiscordShardedClient>()
 
-                .AddDbContext<DatabaseContext>(x => x.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)))
-
-                .AddSingleton<OAuthManager>()
-
                 .AddSingleton(new InteractionServiceConfig
                 {
                     DefaultRunMode = RunMode.Async,
@@ -53,20 +50,22 @@ namespace DexterSlash
 
                 .AddSingleton<InteractionService>()
 
-                .AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")))
+                .AddHostedService<DiscordWorker>()
 
-                .Scan(scan => scan
-                    .FromAssemblyOf<IEvent>()
-                    .AddClasses(classes => classes.InNamespaces("DexterSlash.Events"))
-                    .AsImplementedInterfaces()
-                    .WithSingletonLifetime()
-                );
+                .AddDbContext<DatabaseContext>(x => x.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)))
+
+                .AddSingleton<OAuthManager>()
+
+                .AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")));
+
+            GetEvents()
+                .ForEach(type => services.AddSingleton(type));
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie("Cookies", options =>
                 {
-                    options.LoginPath = "/api/v1/login";
-                    options.LogoutPath = "/api/v1/logout";
+                    options.LoginPath = "/api/login";
+                    options.LogoutPath = "/api/logout";
                     options.ExpireTimeSpan = new TimeSpan(7, 0, 0, 0);
                     options.Cookie.MaxAge = new TimeSpan(7, 0, 0, 0);
                     options.Cookie.Name = "dex_access_token";
@@ -152,7 +151,6 @@ namespace DexterSlash
             }
 
             app.UseMiddleware<APIExceptionHandlingMiddleware>();
-            app.UseMiddleware<HeaderMiddleware>();
             app.UseMiddleware<RequestLoggingMiddleware>();
 
             app.UseIpRateLimiting();
@@ -161,8 +159,6 @@ namespace DexterSlash
             {
                 scope.ServiceProvider.GetRequiredService<DatabaseContext>().Database.Migrate();
             }
-
-            app.ApplicationServices.GetServices<IEvent>().ToList().ForEach(eventI => eventI.Initialize());
 
             app.UseHttpsRedirection();
 
@@ -175,20 +171,10 @@ namespace DexterSlash
             {
                 endpoints.MapControllers();
             });
-
-            _ = Login(app.ApplicationServices);
         }
 
-        public async Task Login(IServiceProvider services)
-        {
-            await services.GetRequiredService<InteractionService>()
-                .AddModulesAsync(Assembly.GetEntryAssembly(), services);
-
-            var client = services.GetRequiredService<DiscordShardedClient>();
-
-            await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN"));
-            await client.StartAsync();
-        }
+        public static List<Type> GetEvents() => Assembly.GetAssembly(typeof(Event)).GetTypes()
+                .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(Event))).ToList();
 
     }
 }

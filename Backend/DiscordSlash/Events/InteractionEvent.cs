@@ -1,5 +1,4 @@
 ﻿using Dexter.Enums;
-using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -7,12 +6,14 @@ using System.Text.RegularExpressions;
 
 namespace DexterSlash.Events
 {
-    public class InteractionEvent : IEvent
+    public class InteractionEvent : Event
     {
         private readonly DiscordShardedClient _client;
         private readonly InteractionService _commands;
         private readonly IServiceProvider _services;
         private readonly ILogger<InteractionEvent> _logger;
+
+        private bool _hasInitialized;
 
         public InteractionEvent(ILogger<InteractionEvent> logger, DiscordShardedClient client, InteractionService commands, IServiceProvider services)
         {
@@ -20,9 +21,11 @@ namespace DexterSlash.Events
             _commands = commands;
             _services = services;
             _logger = logger;
+
+            _hasInitialized = false;
         }
 
-        public void Initialize()
+        public override void Initialize()
         {
             // Process the InteractionCreated payloads to execute Interactions commands
             _client.InteractionCreated += HandleInteraction;
@@ -30,22 +33,43 @@ namespace DexterSlash.Events
             // Process the command execution results
             _commands.SlashCommandExecuted += SlashCommandExecuted;
 
-            _client.ShardReady += async (shard) =>
+            _client.ShardReady += GenerateCommands;
+        }
+
+        private async Task GenerateCommands(DiscordSocketClient shard) {
+
+            if (!_hasInitialized)
             {
-                _logger.LogInformation("Initializing guild commands.");
-                
+                _hasInitialized = true;
+
+                _logger.LogInformation("Initializing global commands.");
+
                 try
                 {
-                    foreach(var guild in shard.Guilds)
+                    foreach (var guild in shard.Guilds)
                         await _commands.RegisterCommandsToGuildAsync(guild.Id);
 
-                    _logger.LogInformation("Sucessfully initialized commands!");
+                    _logger.LogInformation("Sucessfully initialized global commands!");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError($"Failed to initialize guild commands!\n{ex}");
                 }
-            };
+            }
+
+            _logger.LogInformation($"Initializing guild commands for shard {shard.ShardId}.");
+
+            try
+            {
+                foreach (var guild in shard.Guilds)
+                    await _commands.RegisterCommandsToGuildAsync(guild.Id);
+
+                _logger.LogInformation($"Sucessfully initialized commands for shard {shard.ShardId}!");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to initialize guild commands for shard {shard.ShardId}!\n{ex}");
+            }
         }
 
         private async Task HandleInteraction(SocketInteraction arg)
@@ -58,7 +82,7 @@ namespace DexterSlash.Events
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                _logger.LogError(ex, $"Unable to execute {arg.Type} in channel {arg.Channel}");
 
                 // If a Slash Command execution fails it is most likely that the original interaction acknowledgement will persist. It is a good idea to delete the original
                 // response, or at least let the user know that something went wrong during the command execution.
@@ -143,11 +167,6 @@ namespace DexterSlash.Events
                     break;
             }
 
-        }
-
-        public EmbedBuilder CreateEmbed(EmojiEnum thumbnail)
-        {
-            return new EmbedBuilder().CreateEmbed(thumbnail, EmbedCallingType.Command);
         }
 
     }
