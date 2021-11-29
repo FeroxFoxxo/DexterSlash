@@ -114,7 +114,8 @@ namespace DexterSlash.Events
                             CreateEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Halt! Don't go there-")
                                 .WithDescription(result.ErrorReason)
-                                .Build()
+                                .Build(),
+                        ephemeral: true
                         );
                     break;
                 case InteractionCommandError.UnknownCommand:
@@ -123,7 +124,8 @@ namespace DexterSlash.Events
                             CreateEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Unknown Command.")
                                 .WithDescription($"Oopsies! It seems as if the command **{commandInfo.Name}** doesn't exist!")
-                                .Build()
+                                .Build(),
+                        ephemeral: true
                         );
                     break;
                 case InteractionCommandError.BadArgs:
@@ -132,7 +134,8 @@ namespace DexterSlash.Events
                             CreateEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Unable to parse command!")
                                 .WithDescription($"Invalid amount of command arguments.")
-                                .Build()
+                                .Build(),
+                        ephemeral: true
                         );
                     break;
                 case InteractionCommandError.Exception:

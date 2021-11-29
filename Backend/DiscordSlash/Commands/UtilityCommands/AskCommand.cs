@@ -18,7 +18,7 @@ namespace DexterSlash.Commands.UtilityCommands
 		[SlashCommand("ask", "Evaluates mathematical expressions and answers questions!")]
 		[Global]
 
-		public async Task WolframCommand(string question)
+		public async Task WolframCommand([MaxLength(1250)] string question)
 		{
 			string response = await WolframAlphaClient.SpokenResultAsync(question);
 

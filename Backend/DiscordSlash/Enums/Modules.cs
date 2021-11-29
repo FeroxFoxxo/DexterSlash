@@ -3,7 +3,8 @@
     public enum Modules
     {
 
-        Leveling
+        Leveling,
+        Modmail
 
     }
 }

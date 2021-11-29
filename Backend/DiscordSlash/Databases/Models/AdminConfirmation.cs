@@ -13,13 +13,12 @@ namespace DexterSlash.Databases.Models
 	{
 
 		/// <summary>
-		/// The TrackerID field is the KEY of the table. It is unique per suggestion.
-		/// It is an alphanumeric, 8 character long token that is randomly generated.
+		/// The TrackerID field is the KEY of the table. It is unique per admin confirmation.
 		/// </summary>
 
 		[Key]
 
-		public string Tracker { get; set; }
+		public int TrackerID { get; set; }
 
 		/// <summary>
 		/// The Callback Class field specifies the class in which the method is that will be called back to.

@@ -99,5 +99,34 @@ namespace DexterSlash.Extensions
 			return new KeyValuePair<string, string>(name, methodName);
 		}
 
+		/// <summary>
+		/// Builds an EmbedBuilder and sends it to the specified IMessageChannel and sends an embed to the user specified.
+		/// </summary>
+		/// <param name="embedBuilder">The EmbedBuilder you wish to send.</param>
+		/// <param name="messageChannel">The IMessageChannel you wish to send the embed to.</param>
+		/// <param name="botConfiguration">The BotConfiguration which is used to find the thumbnail of the embed.</param>
+		/// <param name="user">The IUser you wish to send the DM embed to.</param>
+		/// <param name="dmEmbedBuilder">The Embed you wish to send to the user.</param>
+
+		public static async Task<EmbedBuilder> SendDMAttachedEmbed(this EmbedBuilder embedBuilder, IUser user, EmbedBuilder dmEmbedBuilder)
+		{
+			if (user == null)
+				embedBuilder.AddField("Failed", "I cannot notify this fluff as they have left the server!");
+			else
+			{
+				try
+				{
+					IMessageChannel dmChannel = await user.CreateDMChannelAsync();
+					await dmChannel.SendMessageAsync(embed: dmEmbedBuilder.Build());
+				}
+				catch
+				{
+					embedBuilder.CreateEmbed(EmojiEnum.Annoyed, EmbedCallingType.Command);
+					embedBuilder.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
+				}
+			}
+
+			return embedBuilder;
+		}
 	}
 }

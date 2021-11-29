@@ -12,11 +12,11 @@ namespace DexterSlash.Databases.Models
 	{
 
 		/// <summary>
-		/// Unique identifier for the EventTimer object.
+		/// The TrackerID field is the KEY of the table. It is unique per timer.
 		/// </summary>
 
 		[Key]
-		public string Token { get; set; }
+		public int Token { get; set; }
 
 		/// <summary>
 		/// The delta-time since the event is created until it expires, in seconds.

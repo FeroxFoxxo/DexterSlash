@@ -20,7 +20,7 @@ namespace DexterSlash.Attributes
             if (context.User is not IGuildUser guildUser)
                 return PreconditionResult.FromError("Command must be used in a guild channel.");
             else if (!(await services.GetRequiredService<GuildConfigRepository>().GetGuildConfig(guildUser.Guild.Id)).EnabledModules.HasFlag(_module))
-                return PreconditionResult.FromError(ErrorMessage ?? $"You require administrative privilages to run this command.");
+                return PreconditionResult.FromError(ErrorMessage ?? $"This command has not been enabled in this guild!");
             else
                 return PreconditionResult.FromSuccess();
         }

@@ -12,5 +12,7 @@ namespace DexterSlash.Databases.Models
 
         public string ModInternalNotificationWebhook { get; set; }
 
+        public ulong? ModMailChannelID { get; set; }
+
     }
 }

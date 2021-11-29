@@ -3,7 +3,7 @@ using DexterSlash.Attributes;
 using DexterSlash.Commands;
 using Discord.Interactions;
 
-namespace Dexter.Commands
+namespace Dexter.Commands.UtilityCommands
 {
 
     public class PingCommand : BaseCommand<PingCommand>

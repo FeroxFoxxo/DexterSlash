@@ -12,12 +12,12 @@ namespace DexterSlash.Databases.Models
 	{
 
 		/// <summary>
-		/// The unique numeric ID for a given event and the token by which to target events.
+		/// The TrackerID field is the KEY of the table. It is unique per event.
 		/// </summary>
 
 		[Key]
 
-		public int ID { get; set; }
+		public int TrackerID { get; set; }
 
 		/// <summary>
 		/// The unique user ID of the user who proposed the event.

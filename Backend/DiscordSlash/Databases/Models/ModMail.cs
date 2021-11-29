@@ -12,12 +12,11 @@ namespace DexterSlash.Databases.Models
 
 		/// <summary>
 		/// The TrackerID field is the KEY of the table. It is unique per mail.
-		/// It is an alphanumeric, 8 character long token that is randomly generated.
 		/// </summary>
 
 		[Key]
 
-		public string Tracker { get; set; }
+		public int TrackerID { get; set; }
 
 		/// <summary>
 		/// The UserID field is the snowflake ID of the user who had sent the modmail message.
@@ -35,7 +34,7 @@ namespace DexterSlash.Databases.Models
 		/// The Message ID field is the ID of the embed that has been sent into the modmail channel.
 		/// </summary>
 
-		public ulong MessageID { get; set; }
+		public ulong? MessageID { get; set; }
 
 	}
 

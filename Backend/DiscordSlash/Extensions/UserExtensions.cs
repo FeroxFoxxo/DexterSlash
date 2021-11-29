@@ -17,5 +17,17 @@ namespace DexterSlash.Extensions
 			return string.IsNullOrEmpty(user.GetAvatarUrl(size: size)) ? user.GetDefaultAvatarUrl() : user.GetAvatarUrl(size: size);
 		}
 
+		/// <summary>
+		/// The GetUserInformation method returns a string of the users username, followed by the discriminator, the mention and the ID.
+		/// It is used as a standardized way throughout the bot to display information on a user.
+		/// </summary>
+		/// <param name="user">The user of which you want to create the standardized string of the user's information of.</param>
+		/// <returns>A string which contains the user's username, discriminator, mention and ID.</returns>
+
+		public static string GetUserInformation(this IUser user)
+		{
+			return $"{user.Username}#{user.Discriminator} ({user.Mention}) ({user.Id})";
+		}
+
 	}
 }
