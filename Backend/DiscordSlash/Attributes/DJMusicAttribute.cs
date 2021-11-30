@@ -14,7 +14,7 @@ namespace DexterSlash.Attributes
             if (context.User is not IGuildUser guildUser)
                 return PreconditionResult.FromError("Command must be used in a guild channel.");
 
-            var musicConfig = await services.GetRequiredService<ConfigRepository>().GetGuildConfig<ConfigMusic>(Modules.Music, guildUser.Id);
+            var musicConfig = await new ConfigRepository(services).GetGuildConfig<ConfigMusic>(Modules.Music, guildUser.Id);
 
             if (musicConfig.DJRoleID.HasValue)
                 if (!guildUser.RoleIds.Contains(musicConfig.DJRoleID.Value))

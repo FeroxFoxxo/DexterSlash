@@ -24,8 +24,6 @@ namespace DexterSlash.Commands.MusicCommands
 
 		public InteractiveService InteractiveService { get; set; }
 
-		public ClientCredentialsRequest ClientCredentialsRequest { get; set; }
-
 		public MusicEvent MusicEvent { get; set; }
 
 		[SlashCommand("play", "Searches for the desired song. Returns top 5 most popular results. Click on one of the reaction icons to play the appropriate track.")]
@@ -110,7 +108,6 @@ namespace DexterSlash.Commands.MusicCommands
 
 						await SearchSingleTrack($"{youTubeVideo.Snippet.ChannelTitle} {youTubeVideo.Snippet.Title}", player, false);
 					}
-					*/
 				}
 				else if (baseUrl.Contains("soundcloud"))
 				{
@@ -163,6 +160,7 @@ namespace DexterSlash.Commands.MusicCommands
 							.WithDescription("This music type is not implemented. Please contact a developer!")
 							.SendEmbed(Context.Interaction);
 					}
+					*/
 				}
 			}
 			else

@@ -27,7 +27,7 @@ namespace DexterSlash.Attributes
                 switch (_module)
                 {
                     case Modules.Music:
-                        var musicConfig = await services.GetRequiredService<ConfigRepository>().GetGuildConfig<ConfigMusic>(Modules.Music, guildUser.Id);
+                        var musicConfig = await new ConfigRepository(services).GetGuildConfig<ConfigMusic>(Modules.Music, guildUser.Id);
 
                         if (context.Channel.Id != musicConfig.GuildId)
                             return PreconditionResult.FromError("To use this command, you must be in a music channel!");
