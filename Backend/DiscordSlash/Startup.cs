@@ -7,11 +7,14 @@ using DexterSlash.Workers;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Fergun.Interactive;
 using Genbox.WolframAlpha;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using SpotifyAPI.Web;
 using System.Reflection;
+using Victoria;
 
 namespace DexterSlash
 {
@@ -50,13 +53,23 @@ namespace DexterSlash
 
                 .AddSingleton<InteractionService>()
 
+                .AddLavaNode()
+
+                .AddSingleton(provider =>
+                {
+                    var client = provider.GetRequiredService<DiscordShardedClient>();
+                    return new InteractiveService(client, TimeSpan.FromMinutes(5));
+                })
+
                 .AddHostedService<DiscordWorker>()
 
                 .AddDbContext<DatabaseContext>(x => x.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)))
 
                 .AddSingleton<OAuthManager>()
 
-                .AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")));
+                .AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")))
+                
+                .AddSingleton(new ClientCredentialsRequest(Environment.GetEnvironmentVariable("SPOTIFY_ID"), Environment.GetEnvironmentVariable("SPOTIFY_SECRET")));
 
             GetEvents()
                 .ForEach(type => services.AddSingleton(type));

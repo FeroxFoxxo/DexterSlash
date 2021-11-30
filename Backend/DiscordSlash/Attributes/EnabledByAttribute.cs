@@ -1,4 +1,5 @@
-﻿using DexterSlash.Databases.Repositories;
+﻿using DexterSlash.Databases.Models.GuildConfiguration;
+using DexterSlash.Databases.Repositories;
 using DexterSlash.Enums;
 using Discord;
 using Discord.Interactions;
@@ -19,10 +20,23 @@ namespace DexterSlash.Attributes
         {
             if (context.User is not IGuildUser guildUser)
                 return PreconditionResult.FromError("Command must be used in a guild channel.");
-            else if (!(await services.GetRequiredService<GuildConfigRepository>().GetGuildConfig(guildUser.Guild.Id)).EnabledModules.HasFlag(_module))
+            else if (await services.GetRequiredService<ConfigRepository>().GetGuildConfig<ConfigBase>(_module, guildUser.Guild.Id) == null)
                 return PreconditionResult.FromError(ErrorMessage ?? $"This command has not been enabled in this guild!");
             else
+            {
+                switch (_module)
+                {
+                    case Modules.Music:
+                        var musicConfig = await services.GetRequiredService<ConfigRepository>().GetGuildConfig<ConfigMusic>(Modules.Music, guildUser.Id);
+
+                        if (context.Channel.Id != musicConfig.GuildId)
+                            return PreconditionResult.FromError("To use this command, you must be in a music channel!");
+
+                        break;
+                }
+
                 return PreconditionResult.FromSuccess();
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ namespace DexterSlash.Databases.Repositories
 
         public async Task<ModMail> CreateModMail(string message, ulong userID)
         {
-            var mail = _context.ModMail.Add(
+            var mail = _context.ModMails.Add(
                 new()
                 {
                     Message = message,
@@ -23,7 +23,7 @@ namespace DexterSlash.Databases.Repositories
 
         public async Task UpdateModMail(int trackerID, ulong messageID)
         {
-            var modMail = await _context.ModMail.FindAsync(trackerID);
+            var modMail = await _context.ModMails.FindAsync(trackerID);
 
             modMail.MessageID = messageID;
 

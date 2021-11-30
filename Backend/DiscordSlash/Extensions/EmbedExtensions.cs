@@ -1,21 +1,18 @@
-﻿using Dexter.Enums;
+﻿using DexterSlash.Enums;
+using DexterSlash.Events;
 using Discord;
+using Discord.Interactions;
+using Discord.WebSocket;
+using Fergun.Interactive;
+using Fergun.Interactive.Pagination;
 using System.Diagnostics;
 using System.Reflection;
+using Victoria.Player;
 
 namespace DexterSlash.Extensions
 {
     public static class EmbedExtensions
 	{
-		/// <summary>
-		/// Builds an embed with the attributes specified by the emoji enum.
-		/// </summary>
-		/// <param name="embedBuilder">The EmbedBuilder which you wish to be built upon.</param>
-		/// <param name="thumbnails">The type of EmbedBuilder you wish it to be, specified by an enum of possibilities.</param>
-		/// <param name="botConfiguration">The BotConfiguration which is used to find the thumbnail of the embed.</param>
-		/// <param name="calledType">The EmbedCallingType that the embed was called to be made from.</param>
-		/// <returns>The built embed, with the thumbnail and color applied.</returns>
-
 		public static EmbedBuilder CreateEmbed(this EmbedBuilder embedBuilder, EmojiEnum thumbnails, EmbedCallingType calledType)
 		{
 			Color Color = thumbnails switch
@@ -67,12 +64,6 @@ namespace DexterSlash.Extensions
 				.WithFooter($"USFurries {name} Module");
 		}
 
-		/// <summary>
-		/// Gets the class of the last method that had been called.
-		/// </summary>
-		/// <param name="searchHeight">The height backwards that you would like to see the call come from.</param>
-		/// <returns>The last called class + method</returns>
-
 		public static KeyValuePair<string, string> GetLastMethodCalled(int searchHeight)
 		{
 			searchHeight += 1;
@@ -99,16 +90,7 @@ namespace DexterSlash.Extensions
 			return new KeyValuePair<string, string>(name, methodName);
 		}
 
-		/// <summary>
-		/// Builds an EmbedBuilder and sends it to the specified IMessageChannel and sends an embed to the user specified.
-		/// </summary>
-		/// <param name="embedBuilder">The EmbedBuilder you wish to send.</param>
-		/// <param name="messageChannel">The IMessageChannel you wish to send the embed to.</param>
-		/// <param name="botConfiguration">The BotConfiguration which is used to find the thumbnail of the embed.</param>
-		/// <param name="user">The IUser you wish to send the DM embed to.</param>
-		/// <param name="dmEmbedBuilder">The Embed you wish to send to the user.</param>
-
-		public static async Task<EmbedBuilder> SendDMAttachedEmbed(this EmbedBuilder embedBuilder, IUser user, EmbedBuilder dmEmbedBuilder)
+		public static async Task SendDMAttachedEmbed(this EmbedBuilder embedBuilder, SocketInteraction interaction, IUser user, EmbedBuilder dmEmbedBuilder)
 		{
 			if (user == null)
 				embedBuilder.AddField("Failed", "I cannot notify this fluff as they have left the server!");
@@ -126,7 +108,134 @@ namespace DexterSlash.Extensions
 				}
 			}
 
-			return embedBuilder;
+			await SendEmbed(embedBuilder, interaction, false);
 		}
+
+		public static async Task SendEmbed(this EmbedBuilder embedBuilder, SocketInteraction interaction, bool? overrideEphemeral = null)
+        {
+			bool ephemeral = overrideEphemeral ?? (embedBuilder.Color == Color.Red);
+
+			await interaction.RespondAsync(
+				embed: embedBuilder.Build(),
+				ephemeral: ephemeral);
+        }
+
+		public static EmbedBuilder GetNowPlaying(this EmbedBuilder builder, LavaTrack track)
+		{
+			return builder.WithTitle("🎵 Now playing").WithDescription(
+								$"Title: **{track.Title}**\n" +
+								$"Duration: **[{track.Position.HumanizeTimeSpan()}/{track.Duration.HumanizeTimeSpan()}]**");
+		}
+
+		public static EmbedBuilder GetQueuedTrack(this EmbedBuilder builder, LavaTrack track, int queueSize)
+		{
+			return builder.WithTitle("⏳ Queued").WithDescription(
+								$"Title: **{track.Title}**\n" +
+								$"Duration: **{track.Duration.HumanizeTimeSpan()}**\n" +
+								$"Queue Position: **{queueSize}**.");
+		}
+
+		public static List<EmbedBuilder> GetQueue(this LavaPlayer<LavaTrack> player, string title, MusicEvent musicEvent)
+		{
+			var embeds = player.Vueue.ToArray().GetQueueFromTrackArray(title);
+
+			if (player.Track != null)
+			{
+				var timeRem = player.Track.Duration - player.Track.Position +
+					TimeSpan.FromSeconds(player.Vueue.Select(x => x.Duration.TotalSeconds).Sum());
+
+				LoopType loopType = LoopType.Off;
+
+				lock (musicEvent.LoopLocker)
+					if (musicEvent.LoopedGuilds.ContainsKey(player.VoiceChannel.Guild.Id))
+						loopType = musicEvent.LoopedGuilds[player.VoiceChannel.Guild.Id];
+
+				embeds
+					.First()
+					.WithDescription($"**Now {(loopType == LoopType.Off ? "Playing" : "Looping")}:**\n" +
+						$"{(loopType == LoopType.Single ? "Looped " : "")}Title: **{player.Track.Title}** " +
+						$"[{player.Track.Position.HumanizeTimeSpan()} / {player.Track.Duration.HumanizeTimeSpan()}]\n\n" +
+						$"**Duration Left:** \n" +
+						$"{player.Vueue.Count + 1} Tracks [{timeRem.HumanizeTimeSpan()}]\n\n" +
+						"Up Next ⬇️" + embeds.First().Description);
+			}
+
+			return embeds;
+		}
+
+		public static List<EmbedBuilder> GetQueueFromTrackArray(this LavaTrack[] tracks, string title)
+		{
+			EmbedBuilder currentBuilder = new EmbedBuilder()
+				.CreateEmbed(EmojiEnum.Unknown, EmbedCallingType.Command)
+				.WithTitle(title);
+
+			List<EmbedBuilder> embeds = new();
+
+			if (tracks.Length == 0)
+			{
+				currentBuilder.WithDescription(currentBuilder.Description += "\n\n*No tracks enqueued.*");
+			}
+
+			for (int index = 0; index < tracks.Length; index++)
+			{
+				EmbedFieldBuilder field = new EmbedFieldBuilder()
+					.WithName($"#{index + 1}. **{tracks[index].Title}**")
+					.WithValue($"{tracks[index].Author} ({tracks[index].Duration:mm\\:ss})");
+
+				if (index % 5 == 0 && index != 0)
+				{
+					embeds.Add(currentBuilder);
+
+					currentBuilder = new EmbedBuilder()
+						.CreateEmbed(EmojiEnum.Unknown, EmbedCallingType.Command)
+						.AddField(field);
+				}
+				else
+				{
+					try
+					{
+						currentBuilder.AddField(field);
+					}
+					catch (Exception)
+					{
+						embeds.Add(currentBuilder);
+
+						currentBuilder = new EmbedBuilder()
+							.CreateEmbed(EmojiEnum.Unknown, EmbedCallingType.Command)
+							.AddField(field);
+					}
+				}
+			}
+
+			embeds.Add(currentBuilder);
+
+			return embeds;
+		}
+
+		public static async Task CreateReactionMenu(this InteractiveService interactiveService, List<EmbedBuilder> embeds, ShardedInteractionContext context)
+		{
+			if (embeds.Count > 1)
+			{
+				PageBuilder[] pageBuilderMenu = new PageBuilder[embeds.Count];
+
+				for (int i = 0; i < embeds.Count; i++)
+					pageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(embeds[i]);
+
+				Paginator paginator = new StaticPaginatorBuilder()
+					.WithPages(pageBuilderMenu)
+					.WithDefaultEmotes()
+					.WithFooter(PaginatorFooter.PageNumber)
+					.WithActionOnCancellation(ActionOnStop.DeleteInput)
+					.WithActionOnTimeout(ActionOnStop.DeleteInput)
+										.Build();
+
+				await context.Interaction.DeferAsync();
+
+				await interactiveService.SendPaginatorAsync(paginator, context.Channel, TimeSpan.FromMinutes(10));
+			}
+			else
+				await embeds.FirstOrDefault().SendEmbed(context.Interaction);
+		}
+
 	}
 }

@@ -1,4 +1,4 @@
-﻿using Dexter.Enums;
+﻿using DexterSlash.Enums;
 using DexterSlash.Attributes;
 using Discord;
 using Discord.Interactions;

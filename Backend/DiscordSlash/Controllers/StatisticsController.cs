@@ -2,6 +2,7 @@
 using DexterSlash.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace DexterSlash.Controllers
 {
@@ -29,7 +30,8 @@ namespace DexterSlash.Controllers
             {
                 botStatus = _status.GetBotStatus(),
                 dbStatus = await _status.GetDbStatus(),
-                username = identity.RestClient.CurrentUser.Username
+                username = identity.RestClient.CurrentUser.Username,
+                uptime = DateTime.Now - Process.GetCurrentProcess().StartTime
             });
         }
 

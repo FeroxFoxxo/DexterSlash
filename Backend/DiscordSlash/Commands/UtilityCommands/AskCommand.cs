@@ -9,16 +9,10 @@ namespace DexterSlash.Commands.UtilityCommands
 
 		public WolframAlphaClient WolframAlphaClient { get; set; }
 
-		/// <summary>
-		/// Evaluates a mathematical expression and gives a result or throws an error.
-		/// </summary>
-		/// <param name="question">A properly formatted stringified math expression.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-
 		[SlashCommand("ask", "Evaluates mathematical expressions and answers questions!")]
 		[Global]
 
-		public async Task WolframCommand([MaxLength(1250)] string question)
+		public async Task Ask([MaxLength(1250)] string question)
 		{
 			string response = await WolframAlphaClient.SpokenResultAsync(question);
 
