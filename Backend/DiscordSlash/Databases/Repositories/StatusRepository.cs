@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace DexterSlash.Databases.Repositories
 {
-    public class StatusRepository : BaseRepository<StatusRepository>
+    public class StatusRepository : BaseRepository
     {
 
         private readonly DiscordShardedClient _client;

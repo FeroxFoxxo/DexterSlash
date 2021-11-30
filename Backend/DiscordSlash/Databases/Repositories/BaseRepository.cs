@@ -2,7 +2,7 @@
 
 namespace DexterSlash.Databases.Repositories
 {
-    public class BaseRepository<T>
+    public class BaseRepository
     {
 
         protected readonly DatabaseContext _context;

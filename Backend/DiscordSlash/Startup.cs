@@ -67,6 +67,12 @@ namespace DexterSlash
 
                 .AddSingleton<OAuthManager>()
 
+                .AddLavaNode(x =>
+                {
+                    x.Port = 2333;
+                    x.SelfDeaf = true;
+                })
+
                 .AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")))
                 
                 .AddSingleton(new ClientCredentialsRequest(Environment.GetEnvironmentVariable("SPOTIFY_ID"), Environment.GetEnvironmentVariable("SPOTIFY_SECRET")));

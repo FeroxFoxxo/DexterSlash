@@ -12,18 +12,19 @@ namespace DexterSlash.Commands.ModeratorCommands
     [Group("modmail", "A list of commands that allows modmail messages to be sent and recieved.")]
 	public class ModmailCommand : BaseCommand<ModmailCommand>
 	{
-		public ConfigRepository GuildConfigRepository { get; set; }
-		public ModMailRepository ModMailRepository { get; set; }
 		public DiscordShardedClient DiscordShardedClient { get; set; }
+		public IServiceProvider Services { get; set; }
 
 		[SlashCommand("send", "Sends an anonymous message to the moderators, which will not show on the server.")]
 		[EnabledBy(Modules.Modmail)]
 
 		public async Task ModMail([MaxLength(1250)] string message)
 		{
-			var guildConfig = await GuildConfigRepository.GetGuildConfig<ConfigModMail>(Modules.Modmail, Context.Guild.Id);
+			var guildConfig = await new ConfigRepository(Services).GetGuildConfig<ConfigModMail>(Modules.Modmail, Context.Guild.Id);
 
-			var mail = await ModMailRepository.CreateModMail(
+			var mailRepo = new ModMailRepository(Services);
+
+			var mail = await mailRepo.CreateModMail(
 				message,
 				Context.User.Id
 			);
@@ -36,7 +37,7 @@ namespace DexterSlash.Commands.ModeratorCommands
 					.Build()
 			);
 
-			await ModMailRepository.UpdateModMail(mail.TrackerID, usrMessage.Id);
+			await mailRepo.UpdateModMail(mail.TrackerID, usrMessage.Id);
 
 			await CreateEmbed(EmojiEnum.Love)
 				.WithTitle("Successfully Sent Modmail")

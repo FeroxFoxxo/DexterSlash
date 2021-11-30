@@ -2,7 +2,7 @@
 
 namespace DexterSlash.Databases.Repositories
 {
-    public class ModMailRepository : BaseRepository<ModMailRepository>
+    public class ModMailRepository : BaseRepository
     {
         public ModMailRepository(IServiceProvider serviceProvider) : base(serviceProvider) { }
 

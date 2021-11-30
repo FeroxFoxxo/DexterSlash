@@ -2,11 +2,12 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Microsoft.Extensions.Hosting;
 using System.Reflection;
 
 namespace DexterSlash.Workers
 {
-    public class DiscordWorker : IHostedService
+    public class DiscordWorker : BackgroundService
     {
 
         private readonly InteractionService _interactions;
@@ -25,21 +26,15 @@ namespace DexterSlash.Workers
                 .ForEach(type => (services.GetRequiredService(type) as Event).Initialize());
         }
 
-        public async Task StartAsync(CancellationToken _)
+        protected override async Task ExecuteAsync(CancellationToken _)
         {
-            _logger.LogInformation("Starting IHostedService registered in Startup");
+            _logger.LogInformation("Starting DiscordWorker registered in Startup");
 
             await _interactions.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
 
             await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN"));
             await _client.StartAsync();
             _logger.LogInformation("Started running client!");
-        }
-
-        public async Task StopAsync(CancellationToken _)
-        {
-            _logger.LogInformation("Stopping client from running!");
-            await _client.StopAsync();
         }
     }
 }

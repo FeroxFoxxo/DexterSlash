@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DexterSlash.Databases.Repositories
 {
-    public class ConfigRepository : BaseRepository<ConfigRepository>
+    public class ConfigRepository : BaseRepository
     {
         public ConfigRepository(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
