@@ -8,7 +8,7 @@ namespace DexterSlash.Commands.MusicCommands
 	public partial class BaseMusicCommand
 	{
 
-		[SlashCommand("skip", "Skips the number of songs specified at once.")]
+		[SlashCommand("skip", "[DJ version of /voteskip] Skips the number of songs specified at once.")]
 		[DJMusic]
 
 		public async Task Skip(int skipCount = 1)

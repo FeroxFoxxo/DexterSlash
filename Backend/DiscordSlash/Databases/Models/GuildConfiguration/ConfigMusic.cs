@@ -6,5 +6,7 @@
 
         public ulong? DJRoleID { get; set; }
 
+        public float? VotePercentage { get; set; }
+
     }
 }

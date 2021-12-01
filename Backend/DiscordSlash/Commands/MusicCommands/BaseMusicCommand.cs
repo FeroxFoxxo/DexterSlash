@@ -24,5 +24,7 @@ namespace DexterSlash.Commands.MusicCommands
 
         public LyricsService LyricsService { get; set; }
 
+        public IServiceProvider Services { get; set; }
+
     }
 }
