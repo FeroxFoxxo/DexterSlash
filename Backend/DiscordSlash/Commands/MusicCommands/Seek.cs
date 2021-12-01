@@ -2,12 +2,11 @@
 using DexterSlash.Enums;
 using DexterSlash.Extensions;
 using Discord.Interactions;
-using Victoria.Node;
-using Victoria.Player;
+using Lavalink4NET.Player;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	public partial class BaseMusicCommand
+    public partial class BaseMusicCommand
 	{
 
 		[SlashCommand("seek", "Seeks the music player to the timespan given.")]
@@ -15,19 +14,9 @@ namespace DexterSlash.Commands.MusicCommands
 
 		public async Task Seek(string seekPosition)
 		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-						.WithTitle("Could not seek current song.")
-						.WithDescription(
-							"I couldn't find the music player for this server.\n" +
-							"Please ensure I am connected to a voice channel before using this command.")
-						.SendEmbed(Context.Interaction);
+			var player = AudioService.TryGetPlayer(Context, "seek song");
 
-				return;
-			}
-
-			if (player.PlayerState != PlayerState.Playing)
+			if (player.State != PlayerState.Playing)
 			{
 				await CreateEmbed(EmojiEnum.Annoyed)
 						.WithTitle("Could not seek current song.")
@@ -91,7 +80,7 @@ namespace DexterSlash.Commands.MusicCommands
 				}
 
 
-			if (player.Track.Duration < result)
+			if (player.CurrentTrack.Duration < result)
 			{
 				await CreateEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Could not seek song!")
@@ -101,11 +90,11 @@ namespace DexterSlash.Commands.MusicCommands
 				return;
 			}
 
-			await player.SeekAsync(result.Value);
+			await player.SeekPositionAsync(result.Value);
 
 			await CreateEmbed(EmojiEnum.Love)
 					.WithTitle($"Seeked current song to {result.Value.HumanizeTimeSpan()}.")
-					.WithDescription($"Seeked applied {player.Track} from {player.Track.Position.HumanizeTimeSpan()} to {result.Value.HumanizeTimeSpan()}~!")
+					.WithDescription($"Seeked applied {player.CurrentTrack} from {player.CurrentTrack.Position.HumanizeTimeSpan()} to {result.Value.HumanizeTimeSpan()}~!")
 					.SendEmbed(Context.Interaction);
 		}
 

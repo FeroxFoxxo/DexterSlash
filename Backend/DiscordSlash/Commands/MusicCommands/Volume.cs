@@ -2,11 +2,10 @@
 using DexterSlash.Enums;
 using DexterSlash.Extensions;
 using Discord.Interactions;
-using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	public partial class BaseMusicCommand
+    public partial class BaseMusicCommand
 	{
 
 		[SlashCommand("volume", "Changes the volume. Values are 0-150 and 100 is the default..")]
@@ -14,22 +13,22 @@ namespace DexterSlash.Commands.MusicCommands
 
 		public async Task Volume(int volumeLevel = 100)
 		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
+			var player = AudioService.TryGetPlayer(Context, "change volume");
+
+			if (volumeLevel > 1000 || volumeLevel < 0)
 			{
 				await CreateEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to change volume!")
-					.WithDescription("I couldn't find the music player for this server.\n" +
-						"Please ensure I am connected to a voice channel before using this command.")
+					.WithDescription("Volume out of range: 0% - 1000%!")
 					.SendEmbed(Context.Interaction);
-
 				return;
 			}
 
 			try
 			{
-				int oldVolume = player.Volume;
+				float oldVolume = player.Volume;
 
-				await player.SetVolumeAsync(volumeLevel);
+				await player.SetVolumeAsync(volumeLevel / 100f);
 
 				await CreateEmbed(EmojiEnum.Love)
 					.WithTitle("Volume changed.")

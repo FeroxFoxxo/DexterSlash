@@ -1,12 +1,11 @@
 ﻿using DexterSlash.Enums;
-using DexterSlash.Attributes;
 using DexterSlash.Extensions;
 using Discord.Interactions;
 
 namespace DexterSlash.Commands.UtilityCommands
 {
 
-	public partial class BaseUtilityCommand
+    public partial class BaseUtilityCommand
 	{
 
 		[SlashCommand("latency", "Gets the estimate round-trip latency to the gateway server.")]

@@ -2,11 +2,10 @@
 using DexterSlash.Enums;
 using DexterSlash.Extensions;
 using Discord.Interactions;
-using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	public partial class BaseMusicCommand
+    public partial class BaseMusicCommand
 	{
 
 		[SlashCommand("remove", "Removes a song at a given position in the queue.")]
@@ -14,30 +13,21 @@ namespace DexterSlash.Commands.MusicCommands
 
 		public async Task Remove(int index)
 		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
+			var player = AudioService.TryGetPlayer(Context, "remove song");
+
+			if (player.Queue.Count < index)
 			{
 				await CreateEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to remove song!")
-					.WithDescription("I couldn't find the music player for this server.\n" +
-						"Please ensure I am connected to a voice channel before using this command.")
+					.WithDescription($"I couldn't find a song at the index of {index}. The length of the queue is {player.Queue.Count}.")
 					.SendEmbed(Context.Interaction);
 
 				return;
 			}
 
-			if (player.Vueue.Count < index)
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to remove song!")
-					.WithDescription($"I couldn't find a song at the index of {index}. The length of the queue is {player.Vueue.Count}.")
-					.SendEmbed(Context.Interaction);
+			var rtrack = player.Queue.ToArray()[index];
 
-				return;
-			}
-
-			var rtrack = player.Vueue.ToArray()[index];
-
-			player.Vueue.Remove(rtrack);
+			player.Queue.Remove(rtrack);
 
 			await CreateEmbed(EmojiEnum.Love)
 				.WithTitle($"📑 Removed {rtrack.Title}!")

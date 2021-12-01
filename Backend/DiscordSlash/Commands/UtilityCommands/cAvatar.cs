@@ -1,5 +1,4 @@
 ﻿using DexterSlash.Enums;
-using DexterSlash.Attributes;
 using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
@@ -7,7 +6,7 @@ using Discord.Interactions;
 namespace DexterSlash.Commands.UtilityCommands
 {
 
-	public partial class BaseUtilityCommand
+    public partial class BaseUtilityCommand
 	{
 
 		[SlashCommand("avatar", "Gets the avatar of a user mentioned or yours.")]

@@ -9,12 +9,17 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun.Interactive;
 using Genbox.WolframAlpha;
+using Lavalink4NET;
+using Lavalink4NET.DiscordNet;
+using Lavalink4NET.Lyrics;
+using Lavalink4NET.MemoryCache;
+using Lavalink4NET.Player;
+using Lavalink4NET.Tracking;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using SpotifyAPI.Web;
 using System.Reflection;
-using Victoria;
 
 namespace DexterSlash
 {
@@ -53,7 +58,27 @@ namespace DexterSlash
 
                 .AddSingleton<InteractionService>()
 
-                .AddLavaNode()
+                .AddSingleton<ILavalinkCache, LavalinkCache>()
+
+                .AddSingleton<LyricsOptions>()
+
+                .AddSingleton<LyricsService>()
+
+                .AddSingleton<InactivityTrackingOptions>()
+
+                .AddSingleton<InactivityTrackingService>()
+
+                .AddSingleton<IAudioService, LavalinkNode>()
+                
+                .AddSingleton<VoteLavalinkPlayer>()
+
+                .AddSingleton<IDiscordClientWrapper, DiscordClientWrapper>()
+
+                .AddSingleton(new LavalinkNodeOptions {
+                    RestUri = "http://localhost:2333/",
+                    WebSocketUri = "ws://localhost:2333/",
+                    Password = "youshallnotpass"
+                })
 
                 .AddSingleton(provider =>
                 {
@@ -66,12 +91,6 @@ namespace DexterSlash
                 .AddDbContext<DatabaseContext>(x => x.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)))
 
                 .AddSingleton<OAuthManager>()
-
-                .AddLavaNode(x =>
-                {
-                    x.Port = 2333;
-                    x.SelfDeaf = true;
-                })
 
                 .AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")))
                 

@@ -1,15 +1,12 @@
 ﻿using DexterSlash.Enums;
-using DexterSlash.Events;
 using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
 using Fergun.Interactive;
 using Fergun.Interactive.Selection;
+using Lavalink4NET.Player;
+using Lavalink4NET.Rest;
 using SpotifyAPI.Web;
-using Victoria.Node;
-using Victoria.Player;
-using Victoria.Responses.Search;
-using SearchResponse = Victoria.Responses.Search.SearchResponse;
 
 namespace DexterSlash.Commands.MusicCommands
 {
@@ -20,32 +17,13 @@ namespace DexterSlash.Commands.MusicCommands
 
 		public async Task Play(string search)
 		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to play song!")
-					.WithDescription("I couldn't find the music player for this server.\n" +
-						"Please ensure I am connected to a voice channel before using this command.")
-					.SendEmbed(Context.Interaction);
+			if (AudioService.GetPlayer(Context.Guild.Id) == null)
+				await Join();
 
+			if (AudioService.GetPlayer(Context.Guild.Id) == null)
 				return;
-			}
 
-			try
-			{
-				await LavaNode.SearchAsync(SearchType.YouTube, search);
-			}
-			catch (Exception)
-			{
-				Logger.LogError("Lavalink is not connected!\nFailing with embed error...");
-
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle($"Unable to search!")
-					.WithDescription("Failure: lavalink dependency missing.\nPlease check the console logs for more details.")
-					.SendEmbed(Context.Interaction);
-
-				return;
-			}
+			var player = AudioService.TryGetPlayer(Context, "play song");
 
 			if (Uri.TryCreate(search, UriKind.Absolute, out Uri uriResult))
 			{
@@ -157,52 +135,38 @@ namespace DexterSlash.Commands.MusicCommands
 			}
 		}
 
-		public async Task SearchPlaylist(string[] playlist, LavaPlayer<LavaTrack> player)
+		public async Task SearchPlaylist(string[] playlist, VoteLavalinkPlayer player)
 		{
-			bool wasEmpty = player.Vueue.Count == 0 && player.PlayerState != PlayerState.Playing;
+			bool wasEmpty = player.Queue.Count == 0 && player.State != PlayerState.Playing;
 
-			List<LavaTrack> tracks = new ();
+			List<LavalinkTrack> tracks = new ();
 
 			foreach (string search in playlist)
 			{
-				SearchResponse searchResult = await LavaNode.SearchAsync(SearchType.YouTube, search);
-
-				var track = searchResult.Tracks.FirstOrDefault();
+				var track = await AudioService.GetTrackAsync(search, SearchMode.YouTube);
 
 				if (track is not null)
 				{
 					tracks.Add(track);
-					if (player.Vueue.Count == 0 && player.PlayerState != PlayerState.Playing)
-					{
-						await player.PlayAsync(track);
-					}
-					else
-					{
-						lock (MusicEvent.QueueLocker)
-						{
-							player.Vueue.Enqueue(track);
-						}
-					}
+					await player.PlayAsync(track);
 				}
 			}
 
 			List<EmbedBuilder> embeds;
 
 			if (wasEmpty)
-				embeds = player.GetQueue("🎶 Playlist Music Queue", MusicEvent);
+				embeds = player.GetQueue("🎶 Playlist Music Queue");
 			else
 				embeds = tracks.ToArray().GetQueueFromTrackArray("🎶 Playlist Music Queue");
 
 			await InteractiveService.CreateReactionMenu(embeds, Context);
 		}
 
-		public async Task SearchSingleTrack(string search, LavaPlayer<LavaTrack> player, bool searchList)
+		public async Task SearchSingleTrack(string search, VoteLavalinkPlayer player, bool searchList)
 		{
-			SearchResponse searchResult;
+			var tracks = await AudioService.GetTracksAsync(search, SearchMode.YouTube);
 
-			searchResult = await LavaNode.SearchAsync(SearchType.YouTube, search);
-
-			var track = searchResult.Tracks.FirstOrDefault();
+			var track = tracks.FirstOrDefault();
 
 			if (track == null)
 			{
@@ -216,11 +180,11 @@ namespace DexterSlash.Commands.MusicCommands
 
 			if (searchList)
 			{
-				var topResults = searchResult.Tracks.Count <= 5 ? searchResult.Tracks.ToList() : searchResult.Tracks.Take(5).ToList();
+				var topResults = tracks.Count() <= 5 ? tracks.ToList() : tracks.Take(5).ToList();
 
 				string line1 = topResults.Count <= 5
 					? $"I found {topResults.Count} tracks matching your search."
-					: $"I found {searchResult.Tracks.Count:N0} tracks matching your search, here are the top 5.";
+					: $"I found {tracks.Count():N0} tracks matching your search, here are the top 5.";
 
 				var embedFields = new List<EmbedFieldBuilder>();
 
@@ -260,10 +224,10 @@ namespace DexterSlash.Commands.MusicCommands
 				if (!result.IsSuccess)
 					return;
 
-				track = searchResult.Tracks.Where(search => result.Value.EndsWith(search.Title)).FirstOrDefault();
+				track = tracks.Where(search => result.Value.EndsWith(search.Title)).FirstOrDefault();
 			}
 
-			if (player.Vueue.Count == 0 && player.PlayerState != PlayerState.Playing)
+			if (player.Queue.Count == 0 && player.State != PlayerState.Playing)
 			{
 				await player.PlayAsync(track);
 
@@ -273,13 +237,10 @@ namespace DexterSlash.Commands.MusicCommands
 			}
 			else
 			{
-				lock (MusicEvent.QueueLocker)
-				{
-					player.Vueue.Enqueue(track);
-				}
+				await player.PlayAsync(track);
 
 				await CreateEmbed(EmojiEnum.Unknown)
-					.GetQueuedTrack(track, player.Vueue.Count)
+					.GetQueuedTrack(track, player.Queue.Count)
 					.SendEmbed(Context.Interaction);
 			}
 		}

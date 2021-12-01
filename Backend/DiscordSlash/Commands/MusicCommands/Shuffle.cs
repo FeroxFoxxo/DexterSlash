@@ -2,8 +2,6 @@
 using DexterSlash.Enums;
 using DexterSlash.Extensions;
 using Discord.Interactions;
-using Fergun.Interactive;
-using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
@@ -15,19 +13,9 @@ namespace DexterSlash.Commands.MusicCommands
 
 		public async Task Shuffle()
 		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to shuffle queue!")
-					.WithDescription(
-						"I couldn't find the music player for this server.\n" +
-						"Please ensure I am connected to a voice channel before using this command.")
-					.SendEmbed(Context.Interaction);
+			var player = AudioService.TryGetPlayer(Context, "shuffle queue");
 
-				return;
-			}
-
-			if (!player.Vueue.Any())
+			if (!player.Queue.Any())
 			{
 				await CreateEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to shuffle queue!")
@@ -39,11 +27,9 @@ namespace DexterSlash.Commands.MusicCommands
 				return;
 			}
 
-			player.Vueue.Shuffle();
+			player.Queue.Shuffle();
 
-			var embeds = player.GetQueue("🔀 Queue Shuffle", MusicEvent);
-
-			await InteractiveService.CreateReactionMenu(embeds, Context);
+			await QueueEmbed(0, "🔀 Queue Shuffle");
 		}
 
 	}

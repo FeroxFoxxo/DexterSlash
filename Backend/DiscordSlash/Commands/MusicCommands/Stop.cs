@@ -2,11 +2,10 @@
 using DexterSlash.Enums;
 using DexterSlash.Extensions;
 using Discord.Interactions;
-using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	public partial class BaseMusicCommand
+    public partial class BaseMusicCommand
 	{
 
 		[SlashCommand("stop", "Displays the current music queue.")]
@@ -14,22 +13,13 @@ namespace DexterSlash.Commands.MusicCommands
 
 		public async Task Stop()
 		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to stop songs!")
-					.WithDescription("I couldn't find the music player for this server.\n" +
-					"Please ensure I am connected to a voice channel before using this command.")
-					.SendEmbed(Context.Interaction);
+			var player = AudioService.TryGetPlayer(Context, "stop songs");
 
-				return;
-			}
-
-			string vcName = $"**{player.VoiceChannel.Name}**";
+			string vcName = $"**{Context.Guild.GetVoiceChannel(player.VoiceChannelId.Value).Name}**";
 
 			try
 			{
-				string prevTrack = player.Track.Title;
+				string prevTrack = player.CurrentTrack.Title;
 
 				await player.StopAsync();
 

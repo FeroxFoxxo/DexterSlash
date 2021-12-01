@@ -1,8 +1,7 @@
 ﻿using DexterSlash.Enums;
 using DexterSlash.Extensions;
 using Discord.Interactions;
-using Victoria.Node;
-using Victoria.Player;
+using Lavalink4NET.Player;
 
 namespace DexterSlash.Commands.MusicCommands
 {
@@ -13,18 +12,9 @@ namespace DexterSlash.Commands.MusicCommands
 
 		public async Task NowPlaying()
 		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to find current song!")
-					.WithDescription("I couldn't find the music player for this server.\n" +
-					"Please ensure I am connected to a voice channel before using this command.")
-					.SendEmbed(Context.Interaction);
+			var player = AudioService.TryGetPlayer(Context, "find the current song");
 
-				return;
-			}
-
-			if (player.PlayerState != PlayerState.Playing)
+			if (player.State != PlayerState.Playing)
 			{
 				await CreateEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to find current song!")
@@ -35,7 +25,7 @@ namespace DexterSlash.Commands.MusicCommands
 			}
 
 			await CreateEmbed(EmojiEnum.Unknown)
-				.GetNowPlaying(player.Track)
+				.GetNowPlaying(player.CurrentTrack)
 				.SendEmbed(Context.Interaction);
 		}
 	}

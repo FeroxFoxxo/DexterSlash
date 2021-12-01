@@ -2,12 +2,10 @@
 using DexterSlash.Attributes;
 using DexterSlash.Extensions;
 using Discord.Interactions;
-using Victoria.Node;
-using DexterSlash.Events;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	public partial class BaseMusicCommand
+    public partial class BaseMusicCommand
 	{
 
 		[SlashCommand("leave", "Disconnects me from the current voice channel.")]
@@ -15,26 +13,13 @@ namespace DexterSlash.Commands.MusicCommands
 
 		public async Task Leave()
 		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to leave VC!")
-					.WithDescription("I couldn't find the music player for this server.\n" +
-					"Please ensure I am connected to a voice channel before using this command.")
-					.SendEmbed(Context.Interaction);
+			var player = AudioService.TryGetPlayer(Context, "leave vc");
 
-				return;
-			}
-
-			string vcName = $"**{player.VoiceChannel.Name}**";
+			string vcName = $"**{Context.Guild.GetVoiceChannel(player.VoiceChannelId.Value).Name}**";
 
 			try
 			{
-				await LavaNode.LeaveAsync(player.VoiceChannel);
-
-				lock (MusicEvent.LoopLocker)
-					if (MusicEvent.LoopedGuilds.ContainsKey(player.VoiceChannel.Guild.Id))
-						MusicEvent.LoopedGuilds.Remove(player.VoiceChannel.Guild.Id);
+				await player.DisconnectAsync();
 
 				await CreateEmbed(EmojiEnum.Love)
 					.WithTitle("Sucessfully left voice channel!")

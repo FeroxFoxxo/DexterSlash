@@ -3,8 +3,9 @@ using DexterSlash.Enums;
 using DexterSlash.Events;
 using Discord.Interactions;
 using Fergun.Interactive;
+using Lavalink4NET;
+using Lavalink4NET.Lyrics;
 using SpotifyAPI.Web;
-using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
@@ -13,13 +14,15 @@ namespace DexterSlash.Commands.MusicCommands
 
     public partial class BaseMusicCommand : BaseCommand<BaseMusicCommand>
     {
-        public LavaNode LavaNode { get; set; }
+        public IAudioService AudioService { get; set; }
 
         public InteractiveService InteractiveService { get; set; }
 
         public MusicEvent MusicEvent { get; set; }
 
         public ClientCredentialsRequest ClientCredentialsRequest { get; set; }
+
+        public LyricsService LyricsService { get; set; }
 
     }
 }

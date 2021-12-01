@@ -13,16 +13,11 @@
     <PackageReference Include="Genbox.WolframAlpha" Version="3.0.0-alpha3" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.55.0.2449" />
     <PackageReference Include="Humanizer" Version="2.13.14" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+    <PackageReference Include="Lavalink4NET.Discord.NET" Version="2.1.0" />
+    <PackageReference Include="Lavalink4NET.MemoryCache" Version="2.1.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.0" />
-    <PackageReference Include="RestSharp" Version="106.13.0" />
     <PackageReference Include="SpotifyAPI.Web" Version="6.2.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-    <PackageReference Include="Victoria" Version="6.0.1119" />
   </ItemGroup>
 
 </Project>

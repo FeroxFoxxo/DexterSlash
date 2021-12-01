@@ -1,12 +1,9 @@
 ﻿using DexterSlash.Enums;
 using Discord;
 using Discord.Interactions;
-using Victoria;
-using Victoria.Node;
-using Victoria.Player;
-using Victoria.Responses.Search;
 using DexterSlash.Extensions;
-using Fergun.Interactive;
+using Lavalink4NET.Player;
+using Lavalink4NET.Rest;
 
 namespace DexterSlash.Commands.MusicCommands
 {
@@ -19,17 +16,9 @@ namespace DexterSlash.Commands.MusicCommands
 		{
 			if (song == default)
 			{
-				if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
-				{
-					await CreateEmbed(EmojiEnum.Annoyed)
-						.WithTitle("Unable to find lyrics!")
-						.WithDescription("Failed to join voice channel.\nAre you in a voice channel?")
-						.SendEmbed(Context.Interaction);
+				var player = AudioService.TryGetPlayer(Context, "find lyrics");
 
-					return;
-				}
-
-				if (player.PlayerState != PlayerState.Playing)
+				if (player.State != PlayerState.Playing)
 				{
 					await CreateEmbed(EmojiEnum.Annoyed)
 						.WithTitle("Unable to find song!")
@@ -40,14 +29,14 @@ namespace DexterSlash.Commands.MusicCommands
 					return;
 				}
 
-				song = player.Track.Title;
+				song = player.CurrentTrack.Title;
 			}
 
-			SearchResponse searchResult;
+			IEnumerable<LavalinkTrack> searchResult;
 
 			try
 			{
-				searchResult = await LavaNode.SearchAsync(SearchType.YouTube, song);
+				searchResult = await AudioService.GetTracksAsync(song, SearchMode.YouTube);
 			}
 			catch (Exception)
 			{
@@ -61,7 +50,7 @@ namespace DexterSlash.Commands.MusicCommands
 				return;
 			}
 
-			foreach (var track in searchResult.Tracks.Take(5))
+			foreach (var track in searchResult.Take(5))
 			{
 				if (track is null)
 				{
@@ -70,7 +59,7 @@ namespace DexterSlash.Commands.MusicCommands
 
 				try
 				{
-					var lyrics = await track.FetchLyricsFromGeniusAsync();
+					var lyrics = await LyricsService.GetLyricsAsync(track.Author, track.Title);
 
 					if (!string.IsNullOrWhiteSpace(lyrics))
 					{

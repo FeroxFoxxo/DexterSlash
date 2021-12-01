@@ -1,32 +1,24 @@
 ﻿using DexterSlash.Attributes;
 using DexterSlash.Enums;
-using DexterSlash.Events;
 using DexterSlash.Extensions;
+using Discord;
 using Discord.Interactions;
-using Victoria.Node;
-using Victoria.Player;
+using Lavalink4NET.Player;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	public partial class BaseMusicCommand
+    public partial class BaseMusicCommand
 	{
 
-		[SlashCommand("loop", "Toggles looping of the current playlist between `single` / `all` / `off`.")]
+		[SlashCommand("loop", "Toggles looping of the current playlist between on and off.")]
+		[ComponentInteraction("loop-button")]
 		[DJMusic]
 
-		public async Task Loop(LoopType loopType)
+		public async Task Loop()
 		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to loop songs!")
-					.WithDescription("Failed to join voice channel.\nAre you in a voice channel?")
-					.SendEmbed(Context.Interaction);
+			var player = AudioService.TryGetPlayer(Context, "loop song");
 
-				return;
-			}
-
-			if (player.PlayerState != PlayerState.Playing)
+			if (player.State != PlayerState.Playing)
 			{
 				await CreateEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to loop songs!")
@@ -36,30 +28,27 @@ namespace DexterSlash.Commands.MusicCommands
 				return;
 			}
 
-
-			lock (MusicEvent.LoopLocker)
-				MusicEvent.LoopedGuilds[player.VoiceChannel.Guild.Id] = loopType;
-
-			switch (loopType)
+			if (!player.IsLooping)
 			{
-				case LoopType.Single:
-					await CreateEmbed(EmojiEnum.Unknown)
-						.WithTitle($"🔂 Repeated Current Track")
-						.WithDescription($"Successfully started repeating **{player.Track.Title}**.")
-						.SendEmbed(Context.Interaction);
-					break;
-				case LoopType.All:
-					await CreateEmbed(EmojiEnum.Unknown)
+				player.IsLooping = true;
+
+				var button = new ComponentBuilder().WithButton("Stop Looping", "loop-button", ButtonStyle.Secondary);
+
+				await CreateEmbed(EmojiEnum.Unknown)
 						.WithTitle($"🔂 Looping Tracks")
-						.WithDescription($"Successfully started looping **{player.Vueue.Count + 1} tracks**.")
-						.SendEmbed(Context.Interaction);
-					break;
-				case LoopType.Off:
-					await CreateEmbed(EmojiEnum.Unknown)
-						.WithTitle($"🔂 Stopped Looping Tracks")
-						.WithDescription($"Successfully stopped looping the current queue.")
-						.SendEmbed(Context.Interaction);
-					break;
+						.WithDescription($"Successfully started looping **{player.Queue.Count + 1} tracks**.")
+						.SendEmbed(Context.Interaction, component: button);
+			}
+			else
+			{
+				player.IsLooping = false;
+
+				var button = new ComponentBuilder().WithButton("Loop", "loop-button", ButtonStyle.Secondary);
+
+				await CreateEmbed(EmojiEnum.Unknown)
+					.WithTitle($"🔂 Stopped Looping Tracks")
+					.WithDescription($"Successfully stopped looping the current queue.")
+					.SendEmbed(Context.Interaction, component: button);
 			}
 		}
 	}

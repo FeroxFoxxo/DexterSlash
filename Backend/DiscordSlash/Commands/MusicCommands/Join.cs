@@ -2,7 +2,6 @@
 using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
-using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
@@ -13,7 +12,7 @@ namespace DexterSlash.Commands.MusicCommands
 
 		public async Task Join()
 		{
-			if (LavaNode.HasPlayer(Context.Guild))
+			if (AudioService.GetPlayer(Context.Guild.Id) != null)
 			{
 				await CreateEmbed(EmojiEnum.Annoyed)
 					.WithTitle($"Unable to join channel!")
@@ -37,7 +36,7 @@ namespace DexterSlash.Commands.MusicCommands
 
 			try
 			{
-				await LavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel);
+				var player = await AudioService.JoinAsync(Context.Guild.Id, voiceState.VoiceChannel.Id);
 
 				await CreateEmbed(EmojiEnum.Love)
 					.WithTitle($"Joined {voiceState.VoiceChannel.Name}!")

@@ -3,7 +3,7 @@ using DexterSlash.Databases.Repositories;
 using DexterSlash.Enums;
 using Discord;
 using Discord.Interactions;
-using Victoria.Node;
+using Lavalink4NET;
 
 namespace DexterSlash.Attributes
 {
@@ -19,11 +19,15 @@ namespace DexterSlash.Attributes
             if (musicConfig.DJRoleID.HasValue)
                 if (!guildUser.RoleIds.Contains(musicConfig.DJRoleID.Value))
                 {
-                    if (services.GetService<LavaNode>().TryGetPlayer(context.Guild, out var player))
+                    var player = services.GetService<IAudioService>().GetPlayer(context.Guild.Id);
+
+                    if (player != null)
                     {
                         int uCount = 0;
 
-                        await foreach (var _ in player.VoiceChannel.GetUsersAsync())
+                        var vc = await context.Guild.GetVoiceChannelAsync(player.VoiceChannelId.Value);
+
+                        await foreach (var _ in vc.GetUsersAsync())
                             uCount++;
 
                         if (uCount <= 2)

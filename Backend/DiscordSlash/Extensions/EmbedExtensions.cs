@@ -1,13 +1,15 @@
 ﻿using DexterSlash.Enums;
 using DexterSlash.Events;
+using DexterSlash.Exceptions;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
+using Lavalink4NET;
+using Lavalink4NET.Player;
 using System.Diagnostics;
 using System.Reflection;
-using Victoria.Player;
 
 namespace DexterSlash.Extensions
 {
@@ -111,23 +113,25 @@ namespace DexterSlash.Extensions
 			await SendEmbed(embedBuilder, interaction, false);
 		}
 
-		public static async Task SendEmbed(this EmbedBuilder embedBuilder, SocketInteraction interaction, bool? overrideEphemeral = null)
-        {
+		public static async Task SendEmbed(this EmbedBuilder embedBuilder, SocketInteraction interaction,
+			bool? overrideEphemeral = null, ComponentBuilder component = null)
+		{
 			bool ephemeral = overrideEphemeral ?? (embedBuilder.Color == Color.Red);
 
 			await interaction.RespondAsync(
 				embed: embedBuilder.Build(),
-				ephemeral: ephemeral);
-        }
+				ephemeral: ephemeral,
+				component: component?.Build());
+		}
 
-		public static EmbedBuilder GetNowPlaying(this EmbedBuilder builder, LavaTrack track)
+		public static EmbedBuilder GetNowPlaying(this EmbedBuilder builder, LavalinkTrack track)
 		{
 			return builder.WithTitle("🎵 Now playing").WithDescription(
 								$"Title: **{track.Title}**\n" +
 								$"Duration: **[{track.Position.HumanizeTimeSpan()}/{track.Duration.HumanizeTimeSpan()}]**");
 		}
 
-		public static EmbedBuilder GetQueuedTrack(this EmbedBuilder builder, LavaTrack track, int queueSize)
+		public static EmbedBuilder GetQueuedTrack(this EmbedBuilder builder, LavalinkTrack track, int queueSize)
 		{
 			return builder.WithTitle("⏳ Queued").WithDescription(
 								$"Title: **{track.Title}**\n" +
@@ -135,35 +139,65 @@ namespace DexterSlash.Extensions
 								$"Queue Position: **{queueSize}**.");
 		}
 
-		public static List<EmbedBuilder> GetQueue(this LavaPlayer<LavaTrack> player, string title, MusicEvent musicEvent)
+		public static VoteLavalinkPlayer TryGetPlayer (this IAudioService audioService, ShardedInteractionContext context, string commandEntry)
+        {
+			
+			var player = audioService.GetPlayer<VoteLavalinkPlayer>(context.Guild.Id);
+
+			if (player == null)
+				throw new MusicException(commandEntry);
+
+			return player;
+		}
+
+		public static List<EmbedBuilder> GetQueue(this VoteLavalinkPlayer player, string title)
 		{
-			var embeds = player.Vueue.ToArray().GetQueueFromTrackArray(title);
+			var embeds = player.Queue.ToArray().GetQueueFromTrackArray(title);
 
-			if (player.Track != null)
+			if (player.CurrentTrack != null)
 			{
-				var timeRem = player.Track.Duration - player.Track.Position +
-					TimeSpan.FromSeconds(player.Vueue.Select(x => x.Duration.TotalSeconds).Sum());
-
-				LoopType loopType = LoopType.Off;
-
-				lock (musicEvent.LoopLocker)
-					if (musicEvent.LoopedGuilds.ContainsKey(player.VoiceChannel.Guild.Id))
-						loopType = musicEvent.LoopedGuilds[player.VoiceChannel.Guild.Id];
+				var timeRem = player.CurrentTrack.Duration - player.CurrentTrack.Position +
+					TimeSpan.FromSeconds(player.Queue.Select(x => x.Duration.TotalSeconds).Sum());
 
 				embeds
 					.First()
-					.WithDescription($"**Now {(loopType == LoopType.Off ? "Playing" : "Looping")}:**\n" +
-						$"{(loopType == LoopType.Single ? "Looped " : "")}Title: **{player.Track.Title}** " +
-						$"[{player.Track.Position.HumanizeTimeSpan()} / {player.Track.Duration.HumanizeTimeSpan()}]\n\n" +
+					.WithDescription($"**Now {(!player.IsLooping ? "Playing" : "Looping")}:**\n" +
+						$"Title: **{player.CurrentTrack.Title}** " +
+						$"[{player.CurrentTrack.Position.HumanizeTimeSpan()} / {player.CurrentTrack.Duration.HumanizeTimeSpan()}]\n\n" +
 						$"**Duration Left:** \n" +
-						$"{player.Vueue.Count + 1} Tracks [{timeRem.HumanizeTimeSpan()}]\n\n" +
+						$"{player.Queue.Count + 1} Tracks [{timeRem.HumanizeTimeSpan()}]\n\n" +
 						"Up Next ⬇️" + embeds.First().Description);
 			}
 
 			return embeds;
 		}
 
-		public static List<EmbedBuilder> GetQueueFromTrackArray(this LavaTrack[] tracks, string title)
+		public static async Task CreateReactionMenu(this InteractiveService interactiveService, List<EmbedBuilder> embeds, ShardedInteractionContext context)
+		{
+			if (embeds.Count > 1)
+			{
+				PageBuilder[] pageBuilderMenu = new PageBuilder[embeds.Count];
+
+				for (int i = 0; i < embeds.Count; i++)
+					pageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(embeds[i]);
+
+				Paginator paginator = new StaticPaginatorBuilder()
+					.WithPages(pageBuilderMenu)
+					.WithDefaultEmotes()
+					.WithFooter(PaginatorFooter.PageNumber)
+					.WithActionOnCancellation(ActionOnStop.DeleteInput)
+					.WithActionOnTimeout(ActionOnStop.DeleteInput)
+										.Build();
+
+				await context.Interaction.DeferAsync();
+
+				await interactiveService.SendPaginatorAsync(paginator, context.Channel, TimeSpan.FromMinutes(10));
+			}
+			else
+				await embeds.FirstOrDefault().SendEmbed(context.Interaction);
+		}
+
+		public static List<EmbedBuilder> GetQueueFromTrackArray(this LavalinkTrack[] tracks, string title)
 		{
 			EmbedBuilder currentBuilder = new EmbedBuilder()
 				.CreateEmbed(EmojiEnum.Unknown, EmbedCallingType.Command)
@@ -210,31 +244,6 @@ namespace DexterSlash.Extensions
 			embeds.Add(currentBuilder);
 
 			return embeds;
-		}
-
-		public static async Task CreateReactionMenu(this InteractiveService interactiveService, List<EmbedBuilder> embeds, ShardedInteractionContext context)
-		{
-			if (embeds.Count > 1)
-			{
-				PageBuilder[] pageBuilderMenu = new PageBuilder[embeds.Count];
-
-				for (int i = 0; i < embeds.Count; i++)
-					pageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(embeds[i]);
-
-				Paginator paginator = new StaticPaginatorBuilder()
-					.WithPages(pageBuilderMenu)
-					.WithDefaultEmotes()
-					.WithFooter(PaginatorFooter.PageNumber)
-					.WithActionOnCancellation(ActionOnStop.DeleteInput)
-					.WithActionOnTimeout(ActionOnStop.DeleteInput)
-										.Build();
-
-				await context.Interaction.DeferAsync();
-
-				await interactiveService.SendPaginatorAsync(paginator, context.Channel, TimeSpan.FromMinutes(10));
-			}
-			else
-				await embeds.FirstOrDefault().SendEmbed(context.Interaction);
 		}
 
 	}

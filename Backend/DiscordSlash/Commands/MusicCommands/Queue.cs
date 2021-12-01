@@ -1,8 +1,6 @@
-﻿using DexterSlash.Enums;
-using DexterSlash.Extensions;
+﻿using DexterSlash.Extensions;
+using Discord;
 using Discord.Interactions;
-using Fergun.Interactive;
-using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
@@ -10,24 +8,36 @@ namespace DexterSlash.Commands.MusicCommands
 	{
 
 		[SlashCommand("queue", "Displays the current queue of songs.")]
-
-		public async Task Queue()
+		public async Task Queue(int pageNumber = 0)
 		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-						.WithTitle("Could not display queue.")
-						.WithDescription(
-							"I couldn't find the music player for this server.\n" +
-							"Please ensure I am connected to a voice channel before using this command.")
-						.SendEmbed(Context.Interaction);
+			await QueueEmbed(pageNumber);
+		}
 
-				return;
+		[ComponentInteraction("queue-button:*")]
+
+		public async Task QueueEmbed(int pageNumber = 0, string name = "🎶 Music Queue")
+		{
+			var player = AudioService.TryGetPlayer(Context, "display queue");
+
+			var embeds = player.GetQueue(name);
+
+			if (pageNumber - 1 < 0)
+			{
+				pageNumber = 0;
+			}
+			else
+			{
+				pageNumber--;
 			}
 
-			var embeds = player.GetQueue("🎶 Music Queue", MusicEvent);
+			var button = new ComponentBuilder()
+				.WithButton("First", $"queue-button:1,{name}", ButtonStyle.Secondary)
+				.WithButton("Back",  $"queue-button:{pageNumber},{name}", ButtonStyle.Secondary)
+				.WithButton("Clear", "clear-button")
+				.WithButton("Next",  $"queue-button:{pageNumber + 2},{name}", ButtonStyle.Secondary)
+				.WithButton("Last",  $"queue-button:{embeds.Count},{name}", ButtonStyle.Secondary);
 
-			await InteractiveService.CreateReactionMenu(embeds, Context);
+			await embeds[pageNumber].SendEmbed(Context.Interaction, component: button);
 		}
 
 	}

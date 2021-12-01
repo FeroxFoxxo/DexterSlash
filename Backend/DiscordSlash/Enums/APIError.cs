@@ -11,7 +11,9 @@
 
         NotFoundInCache,
 
-        InvalidIdentity
+        InvalidIdentity,
+
+        PlayerNotFound
 
     }
 }
