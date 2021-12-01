@@ -1,5 +1,6 @@
 ﻿using DexterSlash.Enums;
 using DexterSlash.Exceptions;
+using DexterSlash.Workers;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -112,7 +113,7 @@ namespace DexterSlash.Extensions
 			await SendEmbed(embedBuilder, interaction, false);
 		}
 
-		public static async Task SendEmbed(this EmbedBuilder embedBuilder, SocketInteraction interaction,
+		public static async Task SendEmbed(this EmbedBuilder embedBuilder, IDiscordInteraction interaction,
 			bool? overrideEphemeral = null, ComponentBuilder component = null)
 		{
 			bool ephemeral = overrideEphemeral ?? (embedBuilder.Color == Color.Red);
@@ -138,18 +139,34 @@ namespace DexterSlash.Extensions
 								$"Queue Position: **{queueSize}**.");
 		}
 
-		public static VoteLavalinkPlayer TryGetPlayer (this IAudioService audioService, ShardedInteractionContext context, string commandEntry)
+		public static DexterPlayer TryGetPlayer (this IAudioService audioService, ShardedInteractionContext context, string commandEntry)
         {
-			
-			var player = audioService.GetPlayer<VoteLavalinkPlayer>(context.Guild.Id);
+			var player = audioService.GetPlayer<DexterPlayer>(context.Guild.Id);
+
+			player?.SetInteraction(context);
+
+			var voiceState = context.User as IVoiceState;
+
+			var voiceChannel = voiceState.VoiceChannel;
 
 			if (player == null)
-				throw new MusicException(commandEntry);
+				throw new MusicException(commandEntry, "I couldn't find the music player for this server.\n" +
+					"Please ensure I am connected to a voice channel before using this command!");
+
+			if (voiceChannel == null)
+				throw new MusicException(commandEntry, "I couldn't find the voice channel you're in.\n" +
+					"Please ensure you are connected to a voice channel before using this command!");
+
+			if (voiceChannel?.Id != player?.VoiceChannelId)
+				throw new MusicException(commandEntry, "You need to be in the same voice channel as me!\n" +
+					"Please ensure you are in the same voice channel I am before using this command!\n\n" +
+                    $"My voice channel: {context.Guild.GetVoiceChannel(player.VoiceChannelId.Value).Name}\n" +
+					$"Your voice channel: {voiceChannel.Name}");
 
 			return player;
 		}
 
-		public static List<EmbedBuilder> GetQueue(this VoteLavalinkPlayer player, string title)
+		public static List<EmbedBuilder> GetQueue(this DexterPlayer player, string title)
 		{
 			var embeds = player.Queue.ToArray().GetQueueFromTrackArray(title);
 

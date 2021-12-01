@@ -64,14 +64,15 @@ namespace DexterSlash
                     var client = provider.GetRequiredService<DiscordShardedClient>();
                     return new InteractiveService(client, TimeSpan.FromMinutes(5));
                 })
-
+                
                 .AddSingleton<ILavalinkCache, LavalinkCache>()
 
                 .AddSingleton<IAudioService, LavalinkNode>()
                 
                 .AddSingleton<IDiscordClientWrapper, DiscordClientWrapper>()
 
-                .AddSingleton(new LavalinkNodeOptions {
+                .AddSingleton(new LavalinkNodeOptions
+                {
                     RestUri = "http://localhost:2333/",
                     WebSocketUri = "ws://localhost:2333/",
                     Password = "youshallnotpass"
@@ -172,6 +173,8 @@ namespace DexterSlash
                         .AllowCredentials();
                 }));
             }
+
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -196,8 +199,6 @@ namespace DexterSlash
             {
                 scope.ServiceProvider.GetRequiredService<DatabaseContext>().Database.Migrate();
             }
-
-            app.ApplicationServices.GetRequiredService<InactivityTrackingService>().BeginTracking();
 
             app.UseHttpsRedirection();
 

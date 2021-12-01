@@ -3,6 +3,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Lavalink4NET;
+using Lavalink4NET.Tracking;
 using System.Reflection;
 
 namespace DexterSlash.Workers
@@ -16,9 +17,10 @@ namespace DexterSlash.Workers
         private readonly ILogger<DiscordWorker> _logger;
         private readonly LavalinkWorker _lavalinkWorker;
         private readonly IAudioService _audio;
+        private readonly InactivityTrackingService _inactivity;
 
         public DiscordWorker(InteractionService interactions, IServiceProvider services, DiscordShardedClient client,
-            ILogger<DiscordWorker> logger, LavalinkWorker lavalinkWorker, IAudioService audio)
+            ILogger<DiscordWorker> logger, LavalinkWorker lavalinkWorker, IAudioService audio, InactivityTrackingService inactivity)
         {
             _interactions = interactions;
             _services = services;
@@ -26,6 +28,7 @@ namespace DexterSlash.Workers
             _logger = logger;
             _lavalinkWorker = lavalinkWorker;
             _audio = audio;
+            _inactivity = inactivity;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stop)
@@ -38,6 +41,8 @@ namespace DexterSlash.Workers
 
             Startup.GetEvents()
                 .ForEach(type => (_services.GetRequiredService(type) as Event).Initialize());
+
+            _inactivity.BeginTracking();
 
             try
             {

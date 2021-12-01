@@ -1,4 +1,5 @@
 ﻿using DexterSlash.Enums;
+using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -81,69 +82,63 @@ namespace DexterSlash.Events
                     if (result.ErrorReason.Length <= 0)
                         return;
 
-                    await interactionContext.Interaction.RespondAsync(
-                        embed: 
-                            CreateEmbed(EmojiEnum.Annoyed)
-                                .WithTitle("Halt! Don't go there-")
-                                .WithDescription(result.ErrorReason)
-                                .Build(),
-                        ephemeral: true
-                        );
+                    await CreateEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Halt! Don't go there-")
+                        .WithDescription(result.ErrorReason)
+                        .SendEmbed(interactionContext.Interaction);
+
                     break;
                 case InteractionCommandError.UnknownCommand:
-                    await interactionContext.Interaction.RespondAsync(
-                        embed:
-                            CreateEmbed(EmojiEnum.Annoyed)
-                                .WithTitle("Unknown Command.")
-                                .WithDescription($"Oopsies! It seems as if the command **{commandInfo.Name}** doesn't exist!")
-                                .Build(),
-                        ephemeral: true
-                        );
+                    await CreateEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Unknown Command.")
+                        .WithDescription($"Oopsies! It seems as if the command **{commandInfo.Name}** doesn't exist!")
+                        .SendEmbed(interactionContext.Interaction);
+
                     break;
                 case InteractionCommandError.BadArgs:
-                    await interactionContext.Interaction.RespondAsync(
-                        embed:
-                            CreateEmbed(EmojiEnum.Annoyed)
-                                .WithTitle("Unable to parse command!")
-                                .WithDescription($"Invalid amount of command arguments.")
-                                .Build(),
-                        ephemeral: true
-                        );
+                    await CreateEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Unable to parse command!")
+                        .WithDescription($"Invalid amount of command arguments.")
+                        .SendEmbed(interactionContext.Interaction);
+
                     break;
                 case InteractionCommandError.Exception:
                     if (result.ToString().Contains("ObjectNotFound"))
                     {
-                        await interactionContext.Interaction.RespondAsync(
-                            embed:
-                                CreateEmbed(EmojiEnum.Annoyed)
-                                    .WithTitle(result.ErrorReason)
-                                    .WithDescription($"If you believe this was an error, please do contact a developer!\n" +
-                                        $"If the {result.ErrorReason.Split(' ')[0].ToLower()} does exist, it may be due to caching. If so, please wait a few minutes.")
-                                    .Build()
-                            );
+                        await CreateEmbed(EmojiEnum.Annoyed)
+                            .WithTitle(result.ErrorReason)
+                            .WithDescription($"If you believe this was an error, please do contact a developer!\n" +
+                                $"If the {result.ErrorReason.Split(' ')[0].ToLower()} does exist, it may be due to caching. If so, please wait a few minutes.")
+                            .SendEmbed(interactionContext.Interaction);
+
+                        return;
+                    }
+
+                    if (result.ToString().Contains("MusicException"))
+                    {
+                        await CreateEmbed(EmojiEnum.Annoyed)
+                            .WithTitle(result.ErrorReason)
+                            .WithDescription($"If you believe this was an error, please do contact a developer!\n.")
+                            .SendEmbed(interactionContext.Interaction);
+
                         return;
                     }
 
                     // If the error is not an ObjectNotFound error, we log the message to the console with the appropriate data.
                     _logger.LogWarning($"Unknown statement reached!\nCommand: {commandInfo.Name}\nresult: {result}");
 
-                    await interactionContext.Interaction.RespondAsync(
-                        embed:
-                            CreateEmbed(EmojiEnum.Annoyed)
-                                .WithTitle(Regex.Replace(result.Error.GetType().Name, @"(?<!^)(?=[A-Z])", " "))
-                                .WithDescription(result.ErrorReason)
-                                .Build()
-                        );
+                    await CreateEmbed(EmojiEnum.Annoyed)
+                        .WithTitle(Regex.Replace(result.Error.GetType().Name, @"(?<!^)(?=[A-Z])", " "))
+                        .WithDescription(result.ErrorReason)
+                        .SendEmbed(interactionContext.Interaction);
 
                     break;
                 case InteractionCommandError.Unsuccessful:
-                    await interactionContext.Interaction.RespondAsync(
-                        embed:
-                            CreateEmbed(EmojiEnum.Annoyed)
-                                .WithTitle("Command Unsuccessful!")
-                                .WithDescription($"I was unable to run this command, please contact a developer!")
-                                .Build()
-                        );
+                    await CreateEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Command Unsuccessful!")
+                        .WithDescription($"I was unable to run this command, please contact a developer!")
+                        .SendEmbed(interactionContext.Interaction);
+
                     break;
                 default:
                     break;

@@ -1,5 +1,6 @@
 ﻿using DexterSlash.Enums;
 using DexterSlash.Extensions;
+using DexterSlash.Workers;
 using Discord;
 using Discord.Interactions;
 using Fergun.Interactive;
@@ -135,7 +136,7 @@ namespace DexterSlash.Commands.MusicCommands
 			}
 		}
 
-		public async Task SearchPlaylist(string[] playlist, VoteLavalinkPlayer player)
+		public async Task SearchPlaylist(string[] playlist, DexterPlayer player)
 		{
 			bool wasEmpty = player.Queue.Count == 0 && player.State != PlayerState.Playing;
 
@@ -162,7 +163,7 @@ namespace DexterSlash.Commands.MusicCommands
 			await InteractiveService.CreateReactionMenu(embeds, Context);
 		}
 
-		public async Task SearchSingleTrack(string search, VoteLavalinkPlayer player, bool searchList)
+		public async Task SearchSingleTrack(string search, DexterPlayer player, bool searchList)
 		{
 			var tracks = await AudioService.GetTracksAsync(search, SearchMode.YouTube);
 

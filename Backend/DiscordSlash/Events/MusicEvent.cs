@@ -1,4 +1,9 @@
-﻿using Lavalink4NET;
+﻿using DexterSlash.Enums;
+using DexterSlash.Extensions;
+using DexterSlash.Workers;
+using Discord;
+using Discord.WebSocket;
+using Lavalink4NET;
 using Lavalink4NET.Events;
 using Lavalink4NET.Player;
 using Lavalink4NET.Rest;
@@ -9,31 +14,130 @@ namespace DexterSlash.Events
     public class MusicEvent : Event
     {
         private readonly ConcurrentDictionary<ulong?, CancellationTokenSource> _disconnectTokens;
+        private readonly ConcurrentDictionary<ulong?, CancellationTokenSource> _aloneDisconnectTokens;
 
         private readonly IAudioService _audioService;
+        private readonly DiscordShardedClient _client;
         private readonly ILogger<MusicEvent> _logger;
 
-        public MusicEvent(IAudioService audioService, ILogger<MusicEvent> logger)
+        public MusicEvent(IAudioService audioService, ILogger<MusicEvent> logger, DiscordShardedClient client)
         {
-            _disconnectTokens = new ConcurrentDictionary<ulong?, CancellationTokenSource>();
             _logger = logger;
+            _client = client;
             _audioService = audioService;
+
+            _disconnectTokens = new ConcurrentDictionary<ulong?, CancellationTokenSource>();
+            _aloneDisconnectTokens = new ConcurrentDictionary<ulong?, CancellationTokenSource>();
         }
 
         public override void Initialize()
         {
-            //_audioService.TrackEnd += AudioService_TrackEnd;
-            //_audioService.TrackStuck += AudioService_TrackStuck;
-            //_audioService.TrackStarted += AudioService_TrackStarted;
-            //_audioService.TrackException += AudioService_TrackException;
+            _audioService.TrackEnd += TrackEnd;
+            _audioService.TrackStuck += TrackStuck;
+            _audioService.TrackStarted += TrackStarted;
+            _audioService.TrackException += TrackException;
+
+            _client.UserVoiceStateUpdated += UserVoiceStateUpdated;
         }
 
-        private async Task AudioService_TrackException(object sender, TrackExceptionEventArgs eventArgs)
+        private async Task UserVoiceStateUpdated(SocketUser user, SocketVoiceState voiceState1, SocketVoiceState voiceState2)
         {
-            if (eventArgs.Player is VoteLavalinkPlayer player)
+            var voiceSocket1 = voiceState1.VoiceChannel;
+            var voiceSocket2 = voiceState2.VoiceChannel;
+
+            if (voiceSocket1 != null)
             {
-                _logger.LogWarning($"Track {player.CurrentTrack?.Title} threw an exception. " +
-                    $"Please check Lavalink console/logs.");
+                if (IsBotInChannel(voiceSocket1))
+                {
+                    var player = _audioService.GetPlayer(voiceSocket1.Guild.Id);
+
+                    if (NumberOfUserInChannel(voiceSocket1) >= 2)
+                    {
+                        await CancelAloneDisconnectAsync(player);
+                    }
+                    else
+                    {
+                        await DisconnectBot(player);
+                    }
+                }
+            }
+
+            if (voiceSocket2 != null)
+            {
+                if (IsBotInChannel(voiceSocket2))
+                {
+                    var player = _audioService.GetPlayer(voiceSocket2.Guild.Id);
+                    if (NumberOfUserInChannel(voiceSocket2) >= 2)
+                    {
+                        await CancelAloneDisconnectAsync(player);
+                    }
+                    else
+                    {
+                        await DisconnectBot(player);
+                    }
+                }
+            }
+        }
+
+        private async Task DisconnectBot(LavalinkPlayer player)
+        {
+            await Task.Run(async () =>
+            {
+                await BotIsAloneAsync(player, TimeSpan.FromSeconds(30));
+                return Task.CompletedTask;
+            });
+        }
+
+        public async Task BotIsAloneAsync(LavalinkPlayer player, TimeSpan timeSpan)
+        {
+            if (!_aloneDisconnectTokens.TryGetValue(player.VoiceChannelId ?? 0, out var value))
+            {
+                value = new CancellationTokenSource();
+                _aloneDisconnectTokens.TryAdd(player.VoiceChannelId, value);
+            }
+            else if (value.IsCancellationRequested)
+            {
+                _aloneDisconnectTokens.TryUpdate(player.VoiceChannelId, new CancellationTokenSource(), value);
+                value = _aloneDisconnectTokens[player.VoiceChannelId ?? 0];
+            }
+
+            var isCancelled = SpinWait.SpinUntil(() => value.IsCancellationRequested, timeSpan);
+            if (isCancelled)
+            {
+                return;
+            }
+
+            await player.DisconnectAsync();
+        }
+
+        private bool IsBotInChannel(SocketGuildChannel socketChannel)
+        {
+            var bot = socketChannel.Users.FirstOrDefault(x => x.Id.Equals(_client.CurrentUser.Id));
+            return bot != null;
+        }
+
+        private int NumberOfUserInChannel(SocketGuildChannel socketChannel)
+        {
+            var voiceUsers = _client.Guilds.FirstOrDefault(
+                    x => x.Name.Equals(socketChannel.Guild.Name))
+                ?.VoiceChannels.FirstOrDefault(
+                    x => x.Name.Equals(socketChannel.Name))
+                ?.Users;
+
+            return voiceUsers?.Count ?? 0;
+        }
+
+        private async Task TrackException(object sender, TrackExceptionEventArgs eventArgs)
+        {
+            if (eventArgs.Player is DexterPlayer player)
+            {
+                _logger.LogWarning($"Track {player.CurrentTrack?.Title} threw an exception. Please check Lavalink console/logs.");
+
+                await CreateEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Oops! This is on us.")
+                    .WithDescription($"We could not play {player.CurrentTrack?.Title} because of an error.\n" +
+                        $"Please contact a developer if this error persists!")
+                    .SendEmbed(player.Context.Interaction);
 
                 if (player.Queue.Count == 0)
                 {
@@ -47,12 +151,12 @@ namespace DexterSlash.Events
             }
         }
 
-        private async Task AudioService_TrackStuck(object sender, TrackStuckEventArgs eventArgs)
+        private async Task TrackStuck(object sender, TrackStuckEventArgs eventArgs)
         {
-            if (eventArgs.Player is VoteLavalinkPlayer player)
+
+            if (eventArgs.Player is DexterPlayer player)
             {
-                _logger.LogWarning($"Track {player.CurrentTrack?.Title} got stuck. " +
-                    $"Please check Lavalink console/logs.");
+                _logger.LogWarning($"Track {player.CurrentTrack?.Title} got stuck. Please check Lavalink console/logs.");
 
                 if (player.IsLooping)
                 {
@@ -89,14 +193,14 @@ namespace DexterSlash.Events
             }
         }
 
-        private async Task AudioService_TrackStarted(object sender, TrackStartedEventArgs eventArgs) => 
+        private async Task TrackStarted(object sender, TrackStartedEventArgs eventArgs) =>
             await CancelDisconnectAsync(eventArgs.Player);
 
-        private async Task AudioService_TrackEnd(object sender, TrackEndEventArgs eventArgs)
+        private async Task TrackEnd(object sender, TrackEndEventArgs eventArgs)
         {
             if (eventArgs.Reason != TrackEndReason.LoadFailed)
             {
-                if (eventArgs.Player is VoteLavalinkPlayer player)
+                if (eventArgs.Player is DexterPlayer player)
                 {
                     if (player.IsLooping)
                     {
@@ -112,8 +216,14 @@ namespace DexterSlash.Events
             }
             else
             {
-                if (eventArgs.Player is VoteLavalinkPlayer player)
+                if (eventArgs.Player is DexterPlayer player)
                 {
+                    await CreateEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Oops! This is on us.")
+                        .WithDescription($"We could not play {player.CurrentTrack?.Title} because of an error.\n" +
+                            $"Please contact a developer if this error persists!")
+                        .SendEmbed(player.Context.Interaction);
+
                     if (player.Queue.IsEmpty)
                     {
                         await InitiateDisconnectAsync(eventArgs.Player, TimeSpan.FromSeconds(40));
@@ -130,6 +240,20 @@ namespace DexterSlash.Events
         public async Task CancelDisconnectAsync(LavalinkPlayer player)
         {
             if (!_disconnectTokens.TryGetValue(player.VoiceChannelId ?? 0, out var value))
+            {
+                value = new CancellationTokenSource();
+            }
+            else if (value.IsCancellationRequested)
+            {
+                return;
+            }
+
+            await Task.Run(() => value.Cancel(true));
+        }
+
+        public async Task CancelAloneDisconnectAsync(LavalinkPlayer player)
+        {
+            if (!_aloneDisconnectTokens.TryGetValue(player.VoiceChannelId ?? 0, out var value))
             {
                 value = new CancellationTokenSource();
             }

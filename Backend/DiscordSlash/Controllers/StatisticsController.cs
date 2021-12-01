@@ -15,7 +15,7 @@ namespace DexterSlash.Controllers
         private readonly StatusRepository _status;
         private readonly OAuthManager _discordAuthManager;
 
-        public StatisticsController (IServiceProvider serviceProvider, StatusRepository status)
+        public StatisticsController (IServiceProvider serviceProvider)
         {
             _discordAuthManager = serviceProvider.GetRequiredService<OAuthManager>();
             _status = new (serviceProvider);
