@@ -1,4 +1,5 @@
 ﻿using DexterSlash.Enums;
+using DexterSlash.Exceptions;
 using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
@@ -103,7 +104,7 @@ namespace DexterSlash.Events
 
                     break;
                 case InteractionCommandError.Exception:
-                    if (result.ToString().Contains("ObjectNotFound"))
+                    if (result.ErrorReason.Contains("ObjectNotFound"))
                     {
                         await CreateEmbed(EmojiEnum.Annoyed)
                             .WithTitle(result.ErrorReason)
@@ -114,14 +115,17 @@ namespace DexterSlash.Events
                         return;
                     }
 
-                    if (result.ToString().Contains("MusicException"))
+                    if (result is ExecuteResult executeResult)
                     {
-                        await CreateEmbed(EmojiEnum.Annoyed)
-                            .WithTitle(result.ErrorReason)
-                            .WithDescription($"If you believe this was an error, please do contact a developer!\n.")
-                            .SendEmbed(interactionContext.Interaction);
+                        if (executeResult.Exception is MusicException music)
+                        {
+                            await CreateEmbed(EmojiEnum.Annoyed)
+                                .WithTitle($"Unable to {music.Name}!")
+                                .WithDescription(music.Description)
+                                .SendEmbed(interactionContext.Interaction);
 
-                        return;
+                            return;
+                        }
                     }
 
                     // If the error is not an ObjectNotFound error, we log the message to the console with the appropriate data.
