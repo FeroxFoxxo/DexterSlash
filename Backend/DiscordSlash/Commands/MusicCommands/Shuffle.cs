@@ -29,7 +29,7 @@ namespace DexterSlash.Commands.MusicCommands
 
 			player.Queue.Shuffle();
 
-			await QueueEmbed(0, "🔀 Queue Shuffle");
+			await QueueEmbed("1", "🔀 Queue Shuffle");
 		}
 
 	}

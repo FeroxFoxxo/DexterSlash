@@ -1,5 +1,4 @@
 ﻿using DexterSlash.Enums;
-using DexterSlash.Events;
 using DexterSlash.Exceptions;
 using Discord;
 using Discord.Interactions;
