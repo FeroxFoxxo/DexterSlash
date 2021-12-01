@@ -14,16 +14,12 @@ namespace DexterSlash.Events
         private readonly IServiceProvider _services;
         private readonly ILogger<InteractionEvent> _logger;
 
-        private bool _hasInitialized;
-
         public InteractionEvent(ILogger<InteractionEvent> logger, DiscordShardedClient client, InteractionService commands, IServiceProvider services)
         {
             _client = client;
             _commands = commands;
             _services = services;
             _logger = logger;
-
-            _hasInitialized = false;
         }
 
         public override void Initialize()
@@ -38,35 +34,13 @@ namespace DexterSlash.Events
         }
 
         private async Task GenerateCommands(DiscordSocketClient shard) {
-
-            if (!_hasInitialized)
-            {
-                _hasInitialized = true;
-
-                _logger.LogInformation("Initializing global commands.");
-
-                try
-                {
-                    await _commands.AddCommandsGloballyAsync(
-                        true,
-                        _commands.SlashCommands.Where(x => x.Attributes.Where(x => x is GlobalAttribute).Any()).ToArray()
-                    );
-
-                    _logger.LogInformation("Sucessfully initialized global commands!");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Failed to initialize guild commands!\n{ex}");
-                }
-            }
-
             _logger.LogInformation($"Initializing guild commands for shard {shard.ShardId}.");
 
             try
             {
                 foreach (var guild in shard.Guilds)
-                    await _commands.RegisterCommandsToGuildAsync(
-                        guild.Id,
+                    await _commands.AddCommandsToGuildAsync(
+                        guild,
                         true
                     );
 

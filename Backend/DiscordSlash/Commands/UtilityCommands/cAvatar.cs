@@ -11,7 +11,6 @@ namespace DexterSlash.Commands.UtilityCommands
 	{
 
 		[SlashCommand("avatar", "Gets the avatar of a user mentioned or yours.")]
-		[Global]
 
 		public async Task Avatar(IUser user = null)
 		{

@@ -11,7 +11,6 @@ namespace DexterSlash.Commands.UtilityCommands
 	{
 
 		[SlashCommand("emoji", "Gets the full image of an emoji.")]
-		[Global]
 
 		public async Task Emoji(string Emoji)
 		{

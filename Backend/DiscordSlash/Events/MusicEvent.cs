@@ -3,6 +3,7 @@ using DexterSlash.Extensions;
 using Discord.WebSocket;
 using Fergun.Interactive;
 using System.Collections.Concurrent;
+using Victoria;
 using Victoria.Node;
 using Victoria.Node.EventArgs;
 using Victoria.Player;
@@ -70,7 +71,7 @@ namespace DexterSlash.Events
 					// There is a logs folder for errors, but the common issue is Java 10 not being installed.
 					// You will have to do this each time you want to test.
 
-					//await _services.UseLavaNodeAsync();
+					await _services.UseLavaNodeAsync();
 				}
 			}
 		}

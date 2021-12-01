@@ -10,7 +10,6 @@ namespace DexterSlash.Commands.UtilityCommands
 		public WolframAlphaClient WolframAlphaClient { get; set; }
 
 		[SlashCommand("ask", "Evaluates mathematical expressions and answers questions!")]
-		[Global]
 
 		public async Task Ask([MaxLength(1250)] string question)
 		{

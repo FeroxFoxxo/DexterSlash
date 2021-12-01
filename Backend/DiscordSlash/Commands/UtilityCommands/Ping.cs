@@ -10,7 +10,6 @@ namespace DexterSlash.Commands.UtilityCommands
 	{
 
 		[SlashCommand("latency", "Gets the estimate round-trip latency to the gateway server.")]
-		[Global]
 
 		public async Task Ping()
 		{
