@@ -30,6 +30,13 @@ namespace DexterSlash
 
         private readonly IWebHostEnvironment CurrentEnvironment;
 
+        private static readonly string connectionString =
+            $"Server={   Environment.GetEnvironmentVariable("MYSQL_HOST")};" +
+            $"Port={     Environment.GetEnvironmentVariable("MYSQL_PORT")};" +
+            $"Database={ Environment.GetEnvironmentVariable("MYSQL_DATABASE")};" +
+            $"Uid={      Environment.GetEnvironmentVariable("MYSQL_USER")};" +
+            $"Pwd={      Environment.GetEnvironmentVariable("MYSQL_PASSWORD")};";
+
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
@@ -39,12 +46,6 @@ namespace DexterSlash
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string connectionString = $"Server={   Environment.GetEnvironmentVariable("MYSQL_HOST")};" +
-                                      $"Port={     Environment.GetEnvironmentVariable("MYSQL_PORT")};" +
-                                      $"Database={ Environment.GetEnvironmentVariable("MYSQL_DATABASE")};" +
-                                      $"Uid={      Environment.GetEnvironmentVariable("MYSQL_USER")};" +
-                                      $"Pwd={      Environment.GetEnvironmentVariable("MYSQL_PASSWORD")};";
-
             services
 
                 .AddSingleton<DiscordShardedClient>()
@@ -58,7 +59,23 @@ namespace DexterSlash
 
                 .AddSingleton<InteractionService>()
 
+                .AddSingleton(provider =>
+                {
+                    var client = provider.GetRequiredService<DiscordShardedClient>();
+                    return new InteractiveService(client, TimeSpan.FromMinutes(5));
+                })
+
                 .AddSingleton<ILavalinkCache, LavalinkCache>()
+
+                .AddSingleton<IAudioService, LavalinkNode>()
+                
+                .AddSingleton<IDiscordClientWrapper, DiscordClientWrapper>()
+
+                .AddSingleton(new LavalinkNodeOptions {
+                    RestUri = "http://localhost:2333/",
+                    WebSocketUri = "ws://localhost:2333/",
+                    Password = "youshallnotpass"
+                })
 
                 .AddSingleton<LyricsOptions>()
 
@@ -68,23 +85,7 @@ namespace DexterSlash
 
                 .AddSingleton<InactivityTrackingService>()
 
-                .AddSingleton<IAudioService, LavalinkNode>()
-                
-                .AddSingleton<VoteLavalinkPlayer>()
-
-                .AddSingleton<IDiscordClientWrapper, DiscordClientWrapper>()
-
-                .AddSingleton(new LavalinkNodeOptions {
-                    RestUri = "http://localhost:2333/",
-                    WebSocketUri = "ws://localhost:2333/",
-                    Password = "youshallnotpass"
-                })
-
-                .AddSingleton(provider =>
-                {
-                    var client = provider.GetRequiredService<DiscordShardedClient>();
-                    return new InteractiveService(client, TimeSpan.FromMinutes(5));
-                })
+                .AddSingleton<LavalinkWorker>()
                 
                 .AddHostedService<DiscordWorker>()
 
@@ -94,7 +95,32 @@ namespace DexterSlash
 
                 .AddSingleton(new WolframAlphaClient(Environment.GetEnvironmentVariable("WOLFRAM_ALPHA")))
                 
-                .AddSingleton(new ClientCredentialsRequest(Environment.GetEnvironmentVariable("SPOTIFY_ID"), Environment.GetEnvironmentVariable("SPOTIFY_SECRET")));
+                .AddSingleton(new ClientCredentialsRequest(Environment.GetEnvironmentVariable("SPOTIFY_ID"), Environment.GetEnvironmentVariable("SPOTIFY_SECRET")))
+
+                .AddMemoryCache()
+
+                .AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>()
+
+            // Loads general configuration from appsettings.json
+                .Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"))
+
+            // Load IP rules from appsettings.json.
+                .Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"))
+
+            // Injects counter and rules stores.
+                .AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>()
+
+                .AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>()
+                
+                .AddEndpointsApiExplorer()
+
+                .AddSwaggerGen()
+
+            // The IHttpContextAccessor service is not registered by default, though the clientId/clientIp resolvers use it.
+                .AddSingleton<IHttpContextAccessor, HttpContextAccessor>()
+
+            // Configuration (resolvers, counter key builders).
+                .AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
             GetEvents()
                 .ForEach(type => services.AddSingleton(type));
@@ -130,13 +156,14 @@ namespace DexterSlash
                 });
 
             services.AddAuthorization(options =>
-                {
-                    options.DefaultPolicy = new AuthorizationPolicyBuilder("Cookies")
-                        .RequireAuthenticatedUser()
-                        .Build();
-                });
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder("Cookies")
+                    .RequireAuthenticatedUser()
+                    .Build();
+            });
 
-            if (CurrentEnvironment.IsDevelopment()) {
+            if (CurrentEnvironment.IsDevelopment())
+            {
                 services.AddCors(o => o.AddPolicy("AngularDevCors", builder =>
                 {
                     builder.WithOrigins("http://127.0.0.1:4200")
@@ -145,34 +172,6 @@ namespace DexterSlash
                         .AllowCredentials();
                 }));
             }
-
-            // Stores rate limit counters and ip rules.
-            services
-                .AddMemoryCache()
-
-                .AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>()
-
-            // Loads general configuration from appsettings.json
-                .Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"))
-
-            // Load IP rules from appsettings.json.
-                .Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"))
-
-            // Injects counter and rules stores.
-                .AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>()
-
-                .AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>()
-
-                .AddMvc();
-
-            services.AddEndpointsApiExplorer()
-                .AddSwaggerGen()
-
-            // The IHttpContextAccessor service is not registered by default, though the clientId/clientIp resolvers use it.
-                .AddSingleton<IHttpContextAccessor, HttpContextAccessor>()
-
-            // Configuration (resolvers, counter key builders).
-                .AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -197,6 +196,8 @@ namespace DexterSlash
             {
                 scope.ServiceProvider.GetRequiredService<DatabaseContext>().Database.Migrate();
             }
+
+            app.ApplicationServices.GetRequiredService<InactivityTrackingService>().BeginTracking();
 
             app.UseHttpsRedirection();
 
