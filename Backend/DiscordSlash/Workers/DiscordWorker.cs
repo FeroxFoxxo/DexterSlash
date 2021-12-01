@@ -2,7 +2,6 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using Microsoft.Extensions.Hosting;
 using System.Reflection;
 
 namespace DexterSlash.Workers
@@ -28,9 +27,17 @@ namespace DexterSlash.Workers
 
         protected override async Task ExecuteAsync(CancellationToken _)
         {
-            _logger.LogInformation("Starting DiscordWorker registered in Startup");
+            _logger.LogInformation("Starting DiscordWorker registered in Startup.");
 
-            await _interactions.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            try
+            {
+                await _interactions.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Modules could not initialize!");
+                return;
+            }
 
             await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN"));
             await _client.StartAsync();

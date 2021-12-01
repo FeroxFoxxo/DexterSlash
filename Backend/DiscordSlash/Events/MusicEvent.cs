@@ -3,7 +3,6 @@ using DexterSlash.Extensions;
 using Discord.WebSocket;
 using Fergun.Interactive;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using Victoria;
 using Victoria.Node;
 using Victoria.Node.EventArgs;

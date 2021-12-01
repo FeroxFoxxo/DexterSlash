@@ -6,9 +6,7 @@ using Discord;
 using Discord.Interactions;
 using Fergun.Interactive;
 using Fergun.Interactive.Selection;
-using Humanizer;
 using SpotifyAPI.Web;
-using System.Web;
 using Victoria.Node;
 using Victoria.Player;
 using Victoria.Responses.Search;
@@ -16,7 +14,7 @@ using SearchResponse = Victoria.Responses.Search.SearchResponse;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	[Group("music", "A list of commands that play music in voice channels.")]
+    [Group("music", "A list of commands that play music in voice channels.")]
 	public class PlayCommand : BaseCommand<PlayCommand>
 	{
 
@@ -25,6 +23,8 @@ namespace DexterSlash.Commands.MusicCommands
 		public InteractiveService InteractiveService { get; set; }
 
 		public MusicEvent MusicEvent { get; set; }
+
+		public ClientCredentialsRequest ClientCredentialsRequest { get; set; }
 
 		[SlashCommand("play", "Searches for the desired song. Returns top 5 most popular results. Click on one of the reaction icons to play the appropriate track.")]
 		[EnabledBy(Modules.Music)]
@@ -62,10 +62,9 @@ namespace DexterSlash.Commands.MusicCommands
 			{
 				string baseUrl = uriResult.Host;
 				string abUrl = uriResult.AbsoluteUri;
-
+				/*
 				if (baseUrl.Contains("youtube") || baseUrl.Contains("youtu.be"))
 				{
-					/*
 					if (abUrl.Contains("list"))
 					{
 						var query = HttpUtility.ParseQueryString(uriResult.Query);
@@ -109,7 +108,8 @@ namespace DexterSlash.Commands.MusicCommands
 						await SearchSingleTrack($"{youTubeVideo.Snippet.ChannelTitle} {youTubeVideo.Snippet.Title}", player, false);
 					}
 				}
-				else if (baseUrl.Contains("soundcloud"))
+				else */
+				if (baseUrl.Contains("soundcloud"))
 				{
 					await SearchSingleTrack($"{abUrl.Split('/').TakeLast(2).First()} {abUrl.Split('/').Last()}".Replace('-', ' '), player, false);
 				}
@@ -160,7 +160,6 @@ namespace DexterSlash.Commands.MusicCommands
 							.WithDescription("This music type is not implemented. Please contact a developer!")
 							.SendEmbed(Context.Interaction);
 					}
-					*/
 				}
 			}
 			else
@@ -292,70 +291,6 @@ namespace DexterSlash.Commands.MusicCommands
 
 				await CreateEmbed(EmojiEnum.Unknown)
 					.GetQueuedTrack(track, player.Vueue.Count)
-					.SendEmbed(Context.Interaction);
-			}
-		}
-
-		[SlashCommand("toggle", "Toggles whether this player is currently paused. Use while songs are playing to pause the player, use while a player is paused to resume it.")]
-
-		public async Task PauseCommand()
-		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to toggle player!")
-					.WithDescription("I couldn't find the music player for this server.\n" +
-						"Please ensure I am connected to a voice channel before using this command.")
-					.SendEmbed(Context.Interaction);
-
-				return;
-			}
-
-			if (player.PlayerState == PlayerState.Paused)
-			{
-				await player.ResumeAsync();
-
-				await CreateEmbed(EmojiEnum.Love)
-					.WithTitle("Resumed the player.")
-					.WithDescription($"Successfully resumed {player.Track.Title}")
-					.SendEmbed(Context.Interaction);
-			}
-			else if (player.PlayerState == PlayerState.Playing)
-			{
-				await player.PauseAsync();
-				await CreateEmbed(EmojiEnum.Love)
-					.WithTitle("Paused the player.")
-					.WithDescription($"Successfully paused {player.Track.Title}")
-					.SendEmbed(Context.Interaction);
-			}
-			else if (player.PlayerState == PlayerState.Stopped)
-			{
-				var track = player.Vueue.FirstOrDefault();
-
-				if (track is not null)
-				{
-					await player.PlayAsync(track);
-
-					await player.SkipAsync();
-				}
-
-				if (player.Track is not null && track is not null)
-					await CreateEmbed(EmojiEnum.Love)
-						.WithTitle("Resumed the player.")
-						.WithDescription($"Successfully resumed {player.Track.Title}")
-						.SendEmbed(Context.Interaction);
-				else
-					await CreateEmbed(EmojiEnum.Love)
-						.WithTitle("Could not resume the player.")
-						.WithDescription($"No tracks currently in queue!")
-						.SendEmbed(Context.Interaction);
-			}
-			else
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to pause the player!")
-					.WithDescription("The player must be either in a playing or paused state to use this command.\n" +
-						$"Current state is **{player.PlayerState.Humanize()}**.")
 					.SendEmbed(Context.Interaction);
 			}
 		}

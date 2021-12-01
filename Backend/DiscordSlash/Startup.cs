@@ -60,7 +60,7 @@ namespace DexterSlash
                     var client = provider.GetRequiredService<DiscordShardedClient>();
                     return new InteractiveService(client, TimeSpan.FromMinutes(5));
                 })
-
+                
                 .AddHostedService<DiscordWorker>()
 
                 .AddDbContext<DatabaseContext>(x => x.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)))

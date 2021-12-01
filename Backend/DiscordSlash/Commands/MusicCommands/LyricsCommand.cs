@@ -18,45 +18,37 @@ namespace DexterSlash.Commands.MusicCommands
 		public LavaNode LavaNode { get; set; }
 		public InteractiveService InteractiveService { get; set; }
 
-		[SlashCommand("lyrics", "Replies with the lyrics to the song provided.")]
+		[SlashCommand("lyrics", "Replies with the lyrics to the current track that is playing, or one provided.")]
 		[EnabledBy(Modules.Music)]
 
-		public async Task Lyrics(string song)
+		public async Task Lyrics(string song = default)
 		{
-			await SendLyricsFromTrack(song);
-		}
-
-		[SlashCommand("lyrics", "Replies with the lyrics to the current track that is playing.")]
-		[EnabledBy(Modules.Music)]
-
-		public async Task Lyrics()
-		{
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
+			if (song == default)
 			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to find lyrics!")
-					.WithDescription("Failed to join voice channel.\nAre you in a voice channel?")
-					.SendEmbed(Context.Interaction);
+				if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
+				{
+					await CreateEmbed(EmojiEnum.Annoyed)
+						.WithTitle("Unable to find lyrics!")
+						.WithDescription("Failed to join voice channel.\nAre you in a voice channel?")
+						.SendEmbed(Context.Interaction);
 
-				return;
+					return;
+				}
+
+				if (player.PlayerState != PlayerState.Playing)
+				{
+					await CreateEmbed(EmojiEnum.Annoyed)
+						.WithTitle("Unable to find song!")
+						.WithDescription("Woaaah there, I'm not playing any tracks. " +
+							"Please make sure I'm playing something before trying to find the lyrics for it!")
+						.SendEmbed(Context.Interaction);
+
+					return;
+				}
+
+				song = player.Track.Title;
 			}
 
-			if (player.PlayerState != PlayerState.Playing)
-			{
-				await CreateEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to find song!")
-					.WithDescription("Woaaah there, I'm not playing any tracks. " +
-						"Please make sure I'm playing something before trying to find the lyrics for it!")
-					.SendEmbed(Context.Interaction);
-
-				return;
-			}
-
-			await SendLyricsFromTrack(player.Track.Title);
-		}
-
-		public async Task SendLyricsFromTrack(string song)
-		{
 			SearchResponse searchResult;
 
 			try
@@ -88,20 +80,20 @@ namespace DexterSlash.Commands.MusicCommands
 
 					if (!string.IsNullOrWhiteSpace(lyrics))
 					{
-						await SendLyricsEmbed(lyrics, "GENIUS", track.Title);
-						return;
-					}
+						List<EmbedBuilder> embeds = new();
 
-				}
-				catch (Exception) { }
+						var lyricsList = lyrics.Split('[');
 
-				try
-				{
-					var lyrics = await track.FetchLyricsFromOvhAsync();
+						foreach (var lyrical in lyricsList)
+							if (lyrical.Length > 0)
+								embeds.Add(
+									CreateEmbed(EmojiEnum.Unknown)
+										.WithTitle($"🎶 {track.Title} - {track.Author} Lyrics")
+										.WithDescription($"{(lyricsList.Length == 1 ? "" : "[")}" +
+											$"{(lyrical.Length > 1700 ? lyrical[..1700] : lyrical)}")
+									);
 
-					if (!string.IsNullOrWhiteSpace(lyrics))
-					{
-						await SendLyricsEmbed(lyrics, "OHV", track.Title);
+						await InteractiveService.CreateReactionMenu(embeds, Context);
 						return;
 					}
 
@@ -113,24 +105,6 @@ namespace DexterSlash.Commands.MusicCommands
 				.WithTitle("Unable to find song!")
 				.WithDescription($"No lyrics found for:\n**{song}**.")
 				.SendEmbed(Context.Interaction);
-		}
-
-		private async Task SendLyricsEmbed (string fullLyrics, string name, string trackTitle)
-		{
-			List<EmbedBuilder> embeds = new();
-
-			var lyricsList = fullLyrics.Split('[');
-
-			foreach (var lyrics in lyricsList)
-				if (lyrics.Length > 0)
-					embeds.Add(
-						CreateEmbed(EmojiEnum.Unknown)
-							.WithTitle($"🎶 {trackTitle} - {name} Lyrics")
-							.WithDescription($"{(lyricsList.Length == 1 ? "" : "[")}" +
-								$"{(lyrics.Length > 1700 ? lyrics[..1700] : lyrics)}")
-						);
-
-			await InteractiveService.CreateReactionMenu(embeds, Context);
 		}
 
 	}

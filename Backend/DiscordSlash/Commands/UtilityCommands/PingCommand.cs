@@ -1,10 +1,9 @@
 ﻿using DexterSlash.Enums;
 using DexterSlash.Attributes;
-using DexterSlash.Commands;
 using DexterSlash.Extensions;
 using Discord.Interactions;
 
-namespace Dexter.Commands.UtilityCommands
+namespace DexterSlash.Commands.UtilityCommands
 {
 
     public class PingCommand : BaseCommand<PingCommand>

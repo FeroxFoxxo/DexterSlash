@@ -1,10 +1,9 @@
 ﻿using DexterSlash.Attributes;
-using DexterSlash.Commands;
 using DexterSlash.Enums;
 using Discord;
 using Discord.Interactions;
 
-namespace Dexter.Commands.LevelingCommands
+namespace DexterSlash.Commands.LevelingCommands
 {
 
     public class LeaderboardCommand : BaseCommand<LeaderboardCommand>
