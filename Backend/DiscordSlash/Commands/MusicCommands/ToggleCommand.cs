@@ -7,15 +7,12 @@ using Victoria.Player;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-    [Group("music", "A list of commands that play music in voice channels.")]
-	public class ToggleCommand : BaseCommand<ToggleCommand>
+	public partial class BaseMusicCommand
 	{
 
-		public LavaNode LavaNode { get; set; }
+		[SlashCommand("toggle", "Toggles whether this player is currently paused, or resume it.")]
 
-		[SlashCommand("toggle", "Toggles whether this player is currently paused. Use while songs are playing to pause the player, use while a player is paused to resume it.")]
-
-		public async Task PauseCommand()
+		public async Task Toggle()
 		{
 			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{

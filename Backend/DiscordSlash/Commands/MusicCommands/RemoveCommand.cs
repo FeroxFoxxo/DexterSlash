@@ -6,11 +6,8 @@ using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	[Group("music", "A list of commands that play music in voice channels.")]
-	public class RemoveCommand : BaseCommand<RemoveCommand>
+	public partial class BaseMusicCommand
 	{
-
-		public LavaNode LavaNode { get; set; }
 
 		[SlashCommand("remove", "Removes a song at a given position in the queue.")]
 		[EnabledBy(Modules.Music)]

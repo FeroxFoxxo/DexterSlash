@@ -7,12 +7,8 @@ using DexterSlash.Events;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-    [Group("music", "A list of commands that play music in voice channels.")]
-	public class LeaveCommand : BaseCommand<LeaveCommand>
+	public partial class BaseMusicCommand
 	{
-
-		public LavaNode LavaNode { get; set; }
-		public MusicEvent MusicEvent { get; set; }
 
 		[SlashCommand("leave", "Disconnects me from the current voice channel.")]
 		[EnabledBy(Modules.Music)]

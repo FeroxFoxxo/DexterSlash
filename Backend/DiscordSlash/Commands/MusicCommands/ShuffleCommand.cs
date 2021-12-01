@@ -1,6 +1,5 @@
 ﻿using DexterSlash.Attributes;
 using DexterSlash.Enums;
-using DexterSlash.Events;
 using DexterSlash.Extensions;
 using Discord.Interactions;
 using Fergun.Interactive;
@@ -8,13 +7,8 @@ using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	[Group("music", "A list of commands that play music in voice channels.")]
-	public class ShuffleCommand : BaseCommand<ShuffleCommand>
+    public partial class BaseMusicCommand
 	{
-
-		public LavaNode LavaNode { get; set; }
-		public InteractiveService InteractiveService { get; set; }
-		public MusicEvent MusicEvent { get; set; }
 
 		[SlashCommand("shuffle", "Shuffles the music queue in a random order.")]
 		[EnabledBy(Modules.Music)]

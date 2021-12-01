@@ -65,10 +65,9 @@ namespace DexterSlash.Events
             try
             {
                 foreach (var guild in shard.Guilds)
-                    await _commands.AddCommandsToGuildAsync(
-                        guild,
-                        true,
-                        _commands.SlashCommands.Where(x => !x.Attributes.Where(x => x is GlobalAttribute).Any()).ToArray()
+                    await _commands.RegisterCommandsToGuildAsync(
+                        guild.Id,
+                        true
                     );
 
                 _logger.LogInformation($"Sucessfully initialized commands for shard {shard.ShardId}!");

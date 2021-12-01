@@ -11,12 +11,8 @@ using Fergun.Interactive;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-    [Group("music", "A list of commands that play music in voice channels.")]
-	public class LyricsCommand : BaseCommand<LyricsCommand>
+	public partial class BaseMusicCommand
 	{
-
-		public LavaNode LavaNode { get; set; }
-		public InteractiveService InteractiveService { get; set; }
 
 		[SlashCommand("lyrics", "Replies with the lyrics to the current track that is playing, or one provided.")]
 		[EnabledBy(Modules.Music)]

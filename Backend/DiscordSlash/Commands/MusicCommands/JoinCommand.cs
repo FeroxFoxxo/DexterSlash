@@ -7,11 +7,8 @@ using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-    [Group("music", "A list of commands that play music in voice channels.")]
-	public class JoinCommand : BaseCommand<JoinCommand>
+	public partial class BaseMusicCommand
 	{
-
-		public LavaNode LavaNode { get; set; }
 
 		[SlashCommand("join", "Tells me to join the voice channel you are currently in.")]
 		[EnabledBy(Modules.Music)]

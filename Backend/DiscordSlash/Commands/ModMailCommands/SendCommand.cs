@@ -9,16 +9,13 @@ using DexterSlash.Databases.Models.GuildConfiguration;
 
 namespace DexterSlash.Commands.ModeratorCommands
 {
-    [Group("modmail", "A list of commands that allows modmail messages to be sent and recieved.")]
-	public class ModmailCommand : BaseCommand<ModmailCommand>
+	public partial class BaseModmailCommand
 	{
-		public DiscordShardedClient DiscordShardedClient { get; set; }
-		public IServiceProvider Services { get; set; }
 
 		[SlashCommand("send", "Sends an anonymous message to the moderators, which will not show on the server.")]
 		[EnabledBy(Modules.Modmail)]
 
-		public async Task ModMail([MaxLength(1250)] string message)
+		public async Task Send([MaxLength(1250)] string message)
 		{
 			var guildConfig = await new ConfigRepository(Services).GetGuildConfig<ConfigModMail>(Modules.Modmail, Context.Guild.Id);
 

@@ -14,19 +14,10 @@ using SearchResponse = Victoria.Responses.Search.SearchResponse;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-    [Group("music", "A list of commands that play music in voice channels.")]
-	public class PlayCommand : BaseCommand<PlayCommand>
+	public partial class BaseMusicCommand
 	{
 
-		public LavaNode LavaNode { get; set; }
-
-		public InteractiveService InteractiveService { get; set; }
-
-		public MusicEvent MusicEvent { get; set; }
-
-		public ClientCredentialsRequest ClientCredentialsRequest { get; set; }
-
-		[SlashCommand("play", "Searches for the desired song. Returns top 5 most popular results. Click on one of the reaction icons to play the appropriate track.")]
+		[SlashCommand("play", "Searches for the desired song. Returns top 5 most popular results.")]
 		[EnabledBy(Modules.Music)]
 
 		public async Task Play(string search)

@@ -6,11 +6,8 @@ using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	[Group("music", "A list of commands that play music in voice channels.")]
-	public class StopCommand : BaseCommand<StopCommand>
+	public partial class BaseMusicCommand
 	{
-
-		public LavaNode LavaNode { get; set; }
 
 		[SlashCommand("stop", "Displays the current music queue.")]
 		[EnabledBy(Modules.Music)]

@@ -7,11 +7,8 @@ using Victoria.Player;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	[Group("music", "A list of commands that play music in voice channels.")]
-	public class SeekCommand : BaseCommand<SeekCommand>
+	public partial class BaseMusicCommand
 	{
-
-		public LavaNode LavaNode { get; set; }
 
 		[SlashCommand("seek", "Seeks the music player to the timespan given.")]
 		[EnabledBy(Modules.Music)]
