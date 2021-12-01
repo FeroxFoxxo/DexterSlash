@@ -1,5 +1,4 @@
-﻿using DexterSlash.Attributes;
-using DexterSlash.Enums;
+﻿using DexterSlash.Enums;
 using DexterSlash.Extensions;
 using Discord.Interactions;
 using Fergun.Interactive;
@@ -11,7 +10,6 @@ namespace DexterSlash.Commands.MusicCommands
 	{
 
 		[SlashCommand("queue", "Displays the current queue of songs.")]
-		[EnabledBy(Modules.Music)]
 
 		public async Task Queue()
 		{

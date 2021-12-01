@@ -1,5 +1,4 @@
 ﻿using DexterSlash.Enums;
-using DexterSlash.Attributes;
 using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
@@ -7,11 +6,10 @@ using Victoria.Node;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	public partial class BaseMusicCommand
+    public partial class BaseMusicCommand
 	{
 
 		[SlashCommand("join", "Tells me to join the voice channel you are currently in.")]
-		[EnabledBy(Modules.Music)]
 
 		public async Task Join()
 		{

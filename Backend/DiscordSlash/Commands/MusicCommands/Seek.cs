@@ -11,7 +11,6 @@ namespace DexterSlash.Commands.MusicCommands
 	{
 
 		[SlashCommand("seek", "Seeks the music player to the timespan given.")]
-		[EnabledBy(Modules.Music)]
 		[DJMusic]
 
 		public async Task Seek(string seekPosition)

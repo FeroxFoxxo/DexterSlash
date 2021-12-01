@@ -1,5 +1,4 @@
-﻿using DexterSlash.Attributes;
-using DexterSlash.Enums;
+﻿using DexterSlash.Enums;
 using DexterSlash.Events;
 using DexterSlash.Extensions;
 using Discord;
@@ -14,11 +13,10 @@ using SearchResponse = Victoria.Responses.Search.SearchResponse;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	public partial class BaseMusicCommand
+    public partial class BaseMusicCommand
 	{
 
 		[SlashCommand("play", "Searches for the desired song. Returns top 5 most popular results.")]
-		[EnabledBy(Modules.Music)]
 
 		public async Task Play(string search)
 		{

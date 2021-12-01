@@ -6,12 +6,12 @@ using Discord.Interactions;
 
 namespace DexterSlash.Attributes
 {
-    public class EnabledByAttribute : PreconditionAttribute
+    public class ModuleAttribute : PreconditionAttribute
     {
 
         private readonly Modules _module;
 
-        public EnabledByAttribute(Modules module)
+        public ModuleAttribute(Modules module)
         {
             _module = module;
         }

@@ -1,4 +1,6 @@
-﻿using DexterSlash.Events;
+﻿using DexterSlash.Attributes;
+using DexterSlash.Enums;
+using DexterSlash.Events;
 using Discord.Interactions;
 using Fergun.Interactive;
 using SpotifyAPI.Web;
@@ -7,6 +9,8 @@ using Victoria.Node;
 namespace DexterSlash.Commands.MusicCommands
 {
     [Group("music", "A list of commands that play music in vcs.")]
+    [Module(Modules.Music)]
+
     public partial class BaseMusicCommand : BaseCommand<BaseMusicCommand>
     {
         public LavaNode LavaNode { get; set; }

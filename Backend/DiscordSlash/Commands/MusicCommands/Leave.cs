@@ -11,7 +11,6 @@ namespace DexterSlash.Commands.MusicCommands
 	{
 
 		[SlashCommand("leave", "Disconnects me from the current voice channel.")]
-		[EnabledBy(Modules.Music)]
 		[DJMusic]
 
 		public async Task Leave()

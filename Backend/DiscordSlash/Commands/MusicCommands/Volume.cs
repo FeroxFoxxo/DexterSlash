@@ -10,7 +10,6 @@ namespace DexterSlash.Commands.MusicCommands
 	{
 
 		[SlashCommand("volume", "Changes the volume. Values are 0-150 and 100 is the default..")]
-		[EnabledBy(Modules.Music)]
 		[DJMusic]
 
 		public async Task Volume(int volumeLevel = 100)

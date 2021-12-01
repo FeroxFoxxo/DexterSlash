@@ -6,9 +6,8 @@ using Discord.Interactions;
 
 namespace DexterSlash.Commands.ModeratorCommands
 {
-    [Group("moderator", "A list of moderator-only commands.")]
-    public class UserDMCommand : BaseCommand<UserDMCommand>
-    {
+	public partial class BaseModeratorCommand
+	{
 
 		[SlashCommand("dm", "Sends a direct message to a user specified.")]
 		[DefaultsAdmin]

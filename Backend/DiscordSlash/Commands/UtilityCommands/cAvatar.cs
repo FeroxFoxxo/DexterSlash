@@ -7,7 +7,7 @@ using Discord.Interactions;
 namespace DexterSlash.Commands.UtilityCommands
 {
 
-    public class AvatarCommand : BaseCommand<AvatarCommand>
+	public partial class BaseUtilityCommand
 	{
 
 		[SlashCommand("avatar", "Gets the avatar of a user mentioned or yours.")]

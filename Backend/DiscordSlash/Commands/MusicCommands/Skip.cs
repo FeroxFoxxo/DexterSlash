@@ -10,7 +10,6 @@ namespace DexterSlash.Commands.MusicCommands
 	{
 
 		[SlashCommand("skip", "Skips the number of songs specified at once.")]
-		[EnabledBy(Modules.Music)]
 		[DJMusic]
 
 		public async Task Skip(int skipCount = 1)

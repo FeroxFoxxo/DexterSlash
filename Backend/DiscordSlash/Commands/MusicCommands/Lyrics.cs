@@ -1,5 +1,4 @@
 ﻿using DexterSlash.Enums;
-using DexterSlash.Attributes;
 using Discord;
 using Discord.Interactions;
 using Victoria;
@@ -11,11 +10,10 @@ using Fergun.Interactive;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	public partial class BaseMusicCommand
+    public partial class BaseMusicCommand
 	{
 
 		[SlashCommand("lyrics", "Replies with the lyrics to the current track that is playing, or one provided.")]
-		[EnabledBy(Modules.Music)]
 
 		public async Task Lyrics(string song = default)
 		{

@@ -7,7 +7,7 @@ using Discord.Interactions;
 namespace DexterSlash.Commands.UtilityCommands
 {
 
-    public class EmojiCommand : BaseCommand<EmojiCommand>
+	public partial class BaseUtilityCommand
 	{
 
 		[SlashCommand("emoji", "Gets the full image of an emoji.")]

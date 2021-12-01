@@ -4,7 +4,7 @@ using Genbox.WolframAlpha;
 
 namespace DexterSlash.Commands.UtilityCommands
 {
-    public class AskCommand : BaseCommand<AskCommand>
+	public partial class BaseUtilityCommand
 	{
 
 		public WolframAlphaClient WolframAlphaClient { get; set; }

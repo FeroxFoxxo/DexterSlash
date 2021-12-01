@@ -11,7 +11,6 @@ namespace DexterSlash.Commands.MusicCommands
 	{
 
 		[SlashCommand("shuffle", "Shuffles the music queue in a random order.")]
-		[EnabledBy(Modules.Music)]
 		[DJMusic]
 
 		public async Task Shuffle()

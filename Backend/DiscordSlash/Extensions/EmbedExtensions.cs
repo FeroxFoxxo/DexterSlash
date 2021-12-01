@@ -20,8 +20,8 @@ namespace DexterSlash.Extensions
 				EmojiEnum.Annoyed => Color.Red,
 				EmojiEnum.Love => Color.Green,
 				EmojiEnum.Sign => Color.Blue,
-				EmojiEnum.Wut => Color.Teal,
-				EmojiEnum.Unknown => Color.Magenta,
+				EmojiEnum.Wut => Color.Gold,
+				EmojiEnum.Unknown => Color.Teal,
 				_ => Color.Magenta
 			};
 

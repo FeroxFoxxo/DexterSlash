@@ -1,11 +1,11 @@
 ﻿using DexterSlash.Enums;
-using DexterSlash.Attributes;
 using DexterSlash.Databases.Repositories;
 using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using DexterSlash.Databases.Models.GuildConfiguration;
+using DexterSlash.Attributes;
 
 namespace DexterSlash.Commands.ModeratorCommands
 {
@@ -13,7 +13,6 @@ namespace DexterSlash.Commands.ModeratorCommands
 	{
 
 		[SlashCommand("send", "Sends an anonymous message to the moderators, which will not show on the server.")]
-		[EnabledBy(Modules.Modmail)]
 
 		public async Task Send([MaxLength(1250)] string message)
 		{

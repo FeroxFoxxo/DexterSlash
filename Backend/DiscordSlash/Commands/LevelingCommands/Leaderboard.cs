@@ -6,11 +6,11 @@ using Discord.Interactions;
 namespace DexterSlash.Commands.LevelingCommands
 {
 
-    public class LeaderboardCommand : BaseCommand<LeaderboardCommand>
+	public partial class BaseUtilityCommand
 	{
 
 		[SlashCommand("leaderboard", "Gets the link to the server's experience leaderboard.")]
-		[EnabledBy(Modules.Leveling)]
+		[Module(Modules.Leveling)]
 
 		public async Task Leaderboard()
 		{

@@ -12,7 +12,6 @@ namespace DexterSlash.Commands.MusicCommands
 	{
 
 		[SlashCommand("loop", "Toggles looping of the current playlist between `single` / `all` / `off`.")]
-		[EnabledBy(Modules.Music)]
 		[DJMusic]
 
 		public async Task Loop(LoopType loopType)

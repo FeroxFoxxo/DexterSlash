@@ -7,7 +7,11 @@
 
         Modmail,
 
-        Music
+        Music,
+
+        Moderator,
+
+        Utility
 
     }
 }

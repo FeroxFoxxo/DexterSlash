@@ -6,7 +6,7 @@ using Discord.Interactions;
 namespace DexterSlash.Commands.UtilityCommands
 {
 
-    public class PingCommand : BaseCommand<PingCommand>
+	public partial class BaseUtilityCommand
 	{
 
 		[SlashCommand("latency", "Gets the estimate round-trip latency to the gateway server.")]

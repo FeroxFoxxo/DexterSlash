@@ -1,5 +1,4 @@
-﻿using DexterSlash.Attributes;
-using DexterSlash.Enums;
+﻿using DexterSlash.Enums;
 using DexterSlash.Extensions;
 using Discord.Interactions;
 using Victoria.Node;
@@ -7,11 +6,10 @@ using Victoria.Player;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	public partial class BaseMusicCommand
+    public partial class BaseMusicCommand
 	{
 
 		[SlashCommand("nowplaying", "Display the currently playing song.")]
-		[EnabledBy(Modules.Music)]
 
 		public async Task NowPlaying()
 		{

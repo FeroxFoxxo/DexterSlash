@@ -10,7 +10,6 @@ namespace DexterSlash.Commands.MusicCommands
 	{
 
 		[SlashCommand("remove", "Removes a song at a given position in the queue.")]
-		[EnabledBy(Modules.Music)]
 		[DJMusic]
 
 		public async Task Remove(int index)
