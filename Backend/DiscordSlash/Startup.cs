@@ -101,13 +101,13 @@ namespace DexterSlash
 
                 .AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>()
 
-            // Loads general configuration from appsettings.json
+                // Loads general configuration from appsettings.json
                 .Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"))
 
-            // Load IP rules from appsettings.json.
+                // Load IP rules from appsettings.json.
                 .Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"))
 
-            // Injects counter and rules stores.
+                // Injects counter and rules stores.
                 .AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>()
 
                 .AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>()
@@ -116,10 +116,10 @@ namespace DexterSlash
 
                 .AddSwaggerGen()
 
-            // The IHttpContextAccessor service is not registered by default, though the clientId/clientIp resolvers use it.
+                // The IHttpContextAccessor service is not registered by default, though the clientId/clientIp resolvers use it.
                 .AddSingleton<IHttpContextAccessor, HttpContextAccessor>()
 
-            // Configuration (resolvers, counter key builders).
+                // Configuration (resolvers, counter key builders).
                 .AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
             GetEvents()
