@@ -1,9 +1,14 @@
-﻿using DexterSlash.Enums;
+﻿using DexterSlash.Attributes;
+using DexterSlash.Databases.Models.GuildConfiguration;
+using DexterSlash.Databases.Repositories;
+using DexterSlash.Enums;
 using DexterSlash.Exceptions;
 using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Microsoft.Extensions.Logging;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace DexterSlash.Events
@@ -32,18 +37,67 @@ namespace DexterSlash.Events
             _commands.SlashCommandExecuted += SlashCommandExecuted;
 
             _client.ShardReady += GenerateCommands;
+
+            _client.Log += Log;
+
+            _commands.Log += Log;
+        }
+
+        private async Task Log(LogMessage logMessage) {
+            LogLevel logLevel = logMessage.Severity switch
+            {
+                LogSeverity.Info => LogLevel.Information,
+                LogSeverity.Debug => LogLevel.Debug,
+                LogSeverity.Critical => LogLevel.Critical,
+                LogSeverity.Error => LogLevel.Error,
+                LogSeverity.Verbose => LogLevel.Trace,
+                LogSeverity.Warning => LogLevel.Warning,
+                _ => throw new NotImplementedException()
+            };
+
+            _logger.Log(logLevel, logMessage.Exception, logMessage.Message);
         }
 
         private async Task GenerateCommands(DiscordSocketClient shard) {
             _logger.LogInformation($"Initializing guild commands for shard {shard.ShardId}.");
 
+            Dictionary<ModuleAttribute, ModuleInfo> modules = new();
+
+            _commands.Modules.ToList().ForEach(module => {
+                var attribute = module.Attributes
+                    .Where(a => a.GetType() == typeof(ModuleAttribute))
+                    .FirstOrDefault();
+
+                if (attribute != null)
+                    if (attribute is ModuleAttribute modA)
+                        modules.Add(modA, module);
+            });
+
+            var confRepo = new ConfigRepository(_services);
+
             try
             {
-                foreach (var guild in shard.Guilds)
-                    await _commands.AddCommandsToGuildAsync(
+                foreach (var guild in shard.Guilds) {
+                    List<ModuleInfo> gModules = new();
+
+                    foreach (var module in modules)
+                    {
+                        var meetsReqirements = await module.Key.CheckRequirementsAsync(
+                            guild.Id,
+                            default,
+                            default,
+                            _services);
+
+                        if (meetsReqirements.IsSuccess)
+                            gModules.Add(module.Value);
+                    }
+
+                    await _commands.AddModulesToGuildAsync(
                         guild,
-                        true
+                        true,
+                        gModules.ToArray()
                     );
+                }
 
                 _logger.LogInformation($"Sucessfully initialized commands for shard {shard.ShardId}!");
             }
@@ -59,6 +113,7 @@ namespace DexterSlash.Events
             {
                 // Create an execution context that matches the generic type parameter of your InteractionModuleBase<T> modules
                 var ctx = new ShardedInteractionContext(_client, arg);
+
                 await _commands.ExecuteCommandAsync(ctx, _services);
             }
             catch (Exception ex)

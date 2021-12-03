@@ -16,6 +16,10 @@ namespace DexterSlash.Databases.Context
 
         public DbSet<ConfigLeveling> ConfigLeveling { get; set; }
 
+        public DbSet<ConfigModerator> ConfigModerator { get; set; }
+
+        public DbSet<ConfigUtility> ConfigUtility { get; set; }
+
         // Models 
 
         public DbSet<ModMail> ModMails { get; set; }

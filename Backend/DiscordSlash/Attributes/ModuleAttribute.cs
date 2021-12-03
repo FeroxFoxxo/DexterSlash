@@ -6,37 +6,36 @@ using Discord.Interactions;
 
 namespace DexterSlash.Attributes
 {
-    public class ModuleAttribute : PreconditionAttribute
+    public class ModuleAttribute : Attribute
     {
 
-        private readonly Modules _module;
+        public readonly Modules Module;
 
         public ModuleAttribute(Modules module)
         {
-            _module = module;
+            Module = module;
         }
 
-        public override async Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context, ICommandInfo commandInfo, IServiceProvider services)
+        public async Task<PreconditionResult> CheckRequirementsAsync(ulong guildID, ulong channelID, ulong userID, IServiceProvider services)
         {
-            if (context.User is not IGuildUser guildUser)
-                return PreconditionResult.FromError("Command must be used in a guild channel.");
-            else if (await services.GetRequiredService<ConfigRepository>().GetGuildConfig<ConfigBase>(_module, guildUser.Guild.Id) == null)
-                return PreconditionResult.FromError(ErrorMessage ?? $"This command has not been enabled in this guild!");
-            else
+            if (await new ConfigRepository(services).GetGuildConfig<ConfigBase>(Module, guildID) == null)
+                return PreconditionResult.FromError($"This command has not been enabled in this guild!");
+
+            switch (Module)
             {
-                switch (_module)
-                {
-                    case Modules.Music:
-                        var musicConfig = await new ConfigRepository(services).GetGuildConfig<ConfigMusic>(Modules.Music, guildUser.Id);
-
-                        if (context.Channel.Id != musicConfig.GuildId)
-                            return PreconditionResult.FromError("To use this command, you must be in a music channel!");
-
+                case Modules.Music:
+                    if (channelID is default(ulong) || userID is default(ulong))
                         break;
-                }
 
-                return PreconditionResult.FromSuccess();
+                    var musicConfig = await new ConfigRepository(services).GetGuildConfig<ConfigMusic>(Modules.Music, userID);
+
+                    if (channelID != musicConfig.GuildId)
+                        return PreconditionResult.FromError("To use this command, you must be in a music channel!");
+
+                    break;
             }
+
+            return PreconditionResult.FromSuccess();
         }
     }
 }

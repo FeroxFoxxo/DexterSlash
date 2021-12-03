@@ -6,6 +6,7 @@ using DexterSlash.Middlewares;
 using DexterSlash.Workers;
 using Discord;
 using Discord.Interactions;
+using Discord.Rest;
 using Discord.WebSocket;
 using Fergun.Interactive;
 using Genbox.WolframAlpha;
@@ -18,6 +19,7 @@ using Lavalink4NET.Tracking;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SpotifyAPI.Web;
 using System.Reflection;
 
@@ -47,8 +49,24 @@ namespace DexterSlash
         public void ConfigureServices(IServiceCollection services)
         {
             services
+                .AddSingleton(provider =>
+                {
+                    var restClient = new DiscordRestClient();
 
-                .AddSingleton<DiscordShardedClient>()
+                    restClient.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN")).GetAwaiter().GetResult();
+
+                    int shards = restClient.GetRecommendedShardCountAsync().GetAwaiter().GetResult();
+
+                    var client = new DiscordShardedClient(new DiscordSocketConfig
+                    {
+                        AlwaysDownloadUsers = true,
+                        MessageCacheSize = 50,
+                        TotalShards = shards,
+                        LogLevel = LogSeverity.Debug
+                    });
+
+                    return client;
+                })
 
                 .AddSingleton(new InteractionServiceConfig
                 {
@@ -85,8 +103,6 @@ namespace DexterSlash
                 .AddSingleton<InactivityTrackingOptions>()
 
                 .AddSingleton<InactivityTrackingService>()
-
-                .AddSingleton<LavalinkWorker>()
                 
                 .AddHostedService<DiscordWorker>()
 

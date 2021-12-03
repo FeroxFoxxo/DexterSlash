@@ -16,6 +16,8 @@ namespace DexterSlash.Databases.Repositories
                 Modules.Modmail => _context.ConfigModMail as DbSet<T>,
                 Modules.Leveling => _context.ConfigLeveling as DbSet<T>,
                 Modules.Music => _context.ConfigMusic as DbSet<T>,
+                Modules.Utility => _context.ConfigUtility as DbSet<T>,
+                Modules.Moderator => _context.ConfigModerator as DbSet<T>,
                 _ => throw new NotImplementedException()
             };
 
