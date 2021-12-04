@@ -33,9 +33,6 @@ namespace DexterSlash.Workers
         {
             _logger.LogInformation("Starting DiscordWorker registered in Startup.");
 
-            Startup.GetEvents()
-                .ForEach(type => (_services.GetRequiredService(type) as Event).Initialize());
-
             _inactivity.BeginTracking();
 
             try

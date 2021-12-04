@@ -70,12 +70,12 @@ namespace DexterSlash.Events
                         modules.Add(modA, module);
             });
 
-            var confRepo = new ConfigRepository(_services);
-
             using var scope = _services.CreateScope();
 
             try
             {
+                var confRepo = new ConfigRepository(scope.ServiceProvider);
+
                 foreach (var guild in shard.Guilds) {
                     List<ModuleInfo> gModules = new();
 
