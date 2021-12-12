@@ -1,4 +1,4 @@
-﻿<table>
+<table>
     <tr>
         <td align="center" width="25%">
             <img src="https://cdn.discordapp.com/attachments/781077443338960926/807479083297931264/DexLove.png"></img>
