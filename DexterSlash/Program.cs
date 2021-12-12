@@ -168,6 +168,8 @@ using (var scope = app.Services.CreateScope())
     context.Database.EnsureCreated();
 }
 
+await app.Services.GetService<InteractionService>().AddModulesAsync(Assembly.GetEntryAssembly(), app.Services);
+
 events.ForEach(type => (app.Services.GetService(type) as Event).Initialize());
 
 app
