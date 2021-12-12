@@ -1,7 +1,6 @@
 ﻿using DexterSlash.Enums;
 using DexterSlash.Extensions;
 using DexterSlash.Workers;
-using Discord;
 using Discord.WebSocket;
 using Lavalink4NET;
 using Lavalink4NET.Events;

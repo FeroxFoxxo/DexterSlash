@@ -7,8 +7,6 @@ using DexterSlash.Extensions;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using Microsoft.Extensions.Logging;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace DexterSlash.Events
@@ -19,6 +17,7 @@ namespace DexterSlash.Events
         private readonly InteractionService _commands;
         private readonly IServiceProvider _services;
         private readonly ILogger<InteractionEvent> _logger;
+        private readonly Dictionary<ModuleAttribute, ModuleInfo> _modules;
 
         public InteractionEvent(ILogger<InteractionEvent> logger, DiscordShardedClient client, InteractionService commands, IServiceProvider services)
         {
@@ -26,6 +25,8 @@ namespace DexterSlash.Events
             _commands = commands;
             _services = services;
             _logger = logger;
+
+            _modules = new();
         }
 
         public override void Initialize()
@@ -38,9 +39,21 @@ namespace DexterSlash.Events
 
             _client.ShardReady += GenerateCommands;
 
+            _client.JoinedGuild += GenerateGuild;
+
             _client.Log += Log;
 
             _commands.Log += Log;
+
+            _commands.Modules.ToList().ForEach(module => {
+                var attribute = module.Preconditions
+                    .Where(a => a.GetType() == typeof(ModuleAttribute))
+                    .FirstOrDefault();
+
+                if (attribute != null)
+                    if (attribute is ModuleAttribute modA)
+                        _modules.Add(modA, module);
+            });
         }
 
         private async Task Log(LogMessage logMessage) {
@@ -58,46 +71,14 @@ namespace DexterSlash.Events
             _logger.Log(logLevel, logMessage.Exception, logMessage.Message);
         }
 
-        private async Task GenerateCommands(DiscordSocketClient shard) {
+        private async Task GenerateCommands(DiscordSocketClient shard)
+        {
             _logger.LogInformation($"Initializing guild commands for shard {shard.ShardId}.");
-
-            Dictionary<ModuleAttribute, ModuleInfo> modules = new();
-
-            _commands.Modules.ToList().ForEach(module => {
-                var attribute = module.Attributes
-                    .Where(a => a.GetType() == typeof(ModuleAttribute))
-                    .FirstOrDefault();
-
-                if (attribute != null)
-                    if (attribute is ModuleAttribute modA)
-                        modules.Add(modA, module);
-            });
-
-            var confRepo = new ConfigRepository(_services);
 
             try
             {
-                foreach (var guild in shard.Guilds) {
-                    List<ModuleInfo> gModules = new();
-
-                    foreach (var module in modules)
-                    {
-                        var meetsReqirements = await module.Key.CheckRequirementsAsync(
-                            guild.Id,
-                            default,
-                            default,
-                            _services);
-
-                        if (meetsReqirements.IsSuccess)
-                            gModules.Add(module.Value);
-                    }
-
-                    await _commands.AddModulesToGuildAsync(
-                        guild,
-                        true,
-                        gModules.ToArray()
-                    );
-                }
+                foreach (var guild in shard.Guilds)
+                    await GenerateGuild(guild);
 
                 _logger.LogInformation($"Sucessfully initialized commands for shard {shard.ShardId}!");
             }
@@ -105,6 +86,26 @@ namespace DexterSlash.Events
             {
                 _logger.LogError($"Failed to initialize guild commands for shard {shard.ShardId}!\n{ex}");
             }
+        }
+
+
+        private async Task GenerateGuild(SocketGuild guild)
+        {
+            List<ModuleInfo> gModules = new();
+
+            using var scope = _services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
+            var scopedRepo = new ConfigRepository(scope.ServiceProvider);
+
+            foreach (var module in _modules)
+                if (await scopedRepo.GetGuildConfig(module.Key.Module, guild.Id) != null)
+                    gModules.Add(module.Value);
+
+            await _commands.AddModulesToGuildAsync(
+                guild,
+                true,
+                gModules.ToArray()
+            );
         }
 
         private async Task HandleInteraction(SocketInteraction arg)

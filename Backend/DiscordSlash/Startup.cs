@@ -14,12 +14,10 @@ using Lavalink4NET;
 using Lavalink4NET.DiscordNet;
 using Lavalink4NET.Lyrics;
 using Lavalink4NET.MemoryCache;
-using Lavalink4NET.Player;
 using Lavalink4NET.Tracking;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using SpotifyAPI.Web;
 using System.Reflection;
 
@@ -213,7 +211,9 @@ namespace DexterSlash
 
             using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
-                scope.ServiceProvider.GetRequiredService<DatabaseContext>().Database.Migrate();
+                var database = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+
+                database.Database.EnsureCreated();
             }
 
             app.UseHttpsRedirection();

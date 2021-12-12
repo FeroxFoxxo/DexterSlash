@@ -30,11 +30,6 @@ namespace DexterSlash.Middlewares
                     context.Response.StatusCode = 401;
                 }
 
-                if (ex is ResourceNotFoundException)
-                {
-                    context.Response.StatusCode = 404;
-                }
-
                 _logger.LogWarning($"Encountered API error type {ex.Error}, message: " + message);
                 context.Response.ContentType = "application/json";
                 await context.Response.WriteAsync(JsonConvert.SerializeObject(new { customError = ex.Error, message }));

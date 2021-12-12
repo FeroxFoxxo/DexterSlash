@@ -16,7 +16,7 @@ namespace DexterSlash.Commands.ModeratorCommands
 
 		public async Task Send([MaxLength(1250)] string message)
 		{
-			var guildConfig = await new ConfigRepository(Services).GetGuildConfig<ConfigModMail>(Modules.Modmail, Context.Guild.Id);
+			var guildConfig = await new ConfigRepository(Services).GetGuildConfig(Modules.Modmail, Context.Guild.Id) as ConfigModMail;
 
 			var mailRepo = new ModMailRepository(Services);
 

@@ -33,11 +33,6 @@ namespace DexterSlash.Workers
         {
             _logger.LogInformation("Starting DiscordWorker registered in Startup.");
 
-            Startup.GetEvents()
-                .ForEach(type => (_services.GetRequiredService(type) as Event).Initialize());
-
-            _inactivity.BeginTracking();
-
             try
             {
                 await _interactions.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
@@ -47,6 +42,11 @@ namespace DexterSlash.Workers
                 _logger.LogError(ex, "Modules could not initialize!");
                 return;
             }
+
+            Startup.GetEvents()
+                .ForEach(type => (_services.GetRequiredService(type) as Event).Initialize());
+
+            _inactivity.BeginTracking();
 
             await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN"));
 

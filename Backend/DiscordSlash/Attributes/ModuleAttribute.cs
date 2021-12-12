@@ -6,7 +6,7 @@ using Discord.Interactions;
 
 namespace DexterSlash.Attributes
 {
-    public class ModuleAttribute : Attribute
+    public class ModuleAttribute : PreconditionAttribute
     {
 
         public readonly Modules Module;
@@ -16,20 +16,20 @@ namespace DexterSlash.Attributes
             Module = module;
         }
 
-        public async Task<PreconditionResult> CheckRequirementsAsync(ulong guildID, ulong channelID, ulong userID, IServiceProvider services)
+        public override async Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context, ICommandInfo commandInfo, IServiceProvider services)
         {
-            if (await new ConfigRepository(services).GetGuildConfig<ConfigBase>(Module, guildID) == null)
+            if (await new ConfigRepository(services).GetGuildConfig(Module, context.Guild.Id) == null)
                 return PreconditionResult.FromError($"This command has not been enabled in this guild!");
 
             switch (Module)
             {
                 case Modules.Music:
-                    if (channelID is default(ulong) || userID is default(ulong))
+                    if (context.Channel.Id is default(ulong) || context.User.Id is default(ulong))
                         break;
 
-                    var musicConfig = await new ConfigRepository(services).GetGuildConfig<ConfigMusic>(Modules.Music, userID);
+                    var musicConfig = await new ConfigRepository(services).GetGuildConfig(Modules.Music, context.User.Id) as ConfigMusic;
 
-                    if (channelID != musicConfig.GuildId)
+                    if (context.Channel.Id != musicConfig.GuildId)
                         return PreconditionResult.FromError("To use this command, you must be in a music channel!");
 
                     break;

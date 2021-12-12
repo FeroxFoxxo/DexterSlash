@@ -1,5 +1,4 @@
-﻿using DexterSlash.Attributes;
-using DexterSlash.Databases.Models.GuildConfiguration;
+﻿using DexterSlash.Databases.Models.GuildConfiguration;
 using DexterSlash.Databases.Repositories;
 using DexterSlash.Enums;
 using DexterSlash.Extensions;
@@ -8,7 +7,7 @@ using Discord.Interactions;
 
 namespace DexterSlash.Commands.MusicCommands
 {
-	public partial class BaseMusicCommand
+    public partial class BaseMusicCommand
 	{
 
 		[SlashCommand("voteskip", "Initializes a skip vote on the current song.")]
@@ -18,7 +17,7 @@ namespace DexterSlash.Commands.MusicCommands
         {
 			var player = AudioService.TryGetPlayer(Context, "vote skip song");
 
-			var musicConfig = await new ConfigRepository(Services).GetGuildConfig<ConfigMusic>(Modules.Music, Context.Guild.Id);
+			var musicConfig = await new ConfigRepository(Services).GetGuildConfig(Modules.Music, Context.Guild.Id) as ConfigMusic;
 
 			var votePercentage = .5f;
 

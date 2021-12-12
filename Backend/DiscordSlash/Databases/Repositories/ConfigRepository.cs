@@ -1,6 +1,5 @@
 ﻿using DexterSlash.Databases.Models.GuildConfiguration;
 using DexterSlash.Enums;
-using DexterSlash.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DexterSlash.Databases.Repositories
@@ -9,26 +8,19 @@ namespace DexterSlash.Databases.Repositories
     {
         public ConfigRepository(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
-        public async Task<T> GetGuildConfig<T>(Modules module, ulong guildId) where T : ConfigBase
+        public async Task<ConfigBase> GetGuildConfig(Modules module, ulong guildId)
         {
-            DbSet<T> guildDB = module switch
+            ConfigBase config = module switch
             {
-                Modules.Modmail => _context.ConfigModMail as DbSet<T>,
-                Modules.Leveling => _context.ConfigLeveling as DbSet<T>,
-                Modules.Music => _context.ConfigMusic as DbSet<T>,
-                Modules.Utility => _context.ConfigUtility as DbSet<T>,
-                Modules.Moderator => _context.ConfigModerator as DbSet<T>,
+                Modules.Modmail => _context.ConfigModMail.AsQueryable().FirstOrDefault(x => x.GuildId == guildId),
+                Modules.Leveling => _context.ConfigLeveling.AsQueryable().FirstOrDefault(x => x.GuildId == guildId),
+                Modules.Music => _context.ConfigMusic.AsQueryable().FirstOrDefault(x => x.GuildId == guildId),
+                Modules.Utility => _context.ConfigUtility.AsQueryable().FirstOrDefault(x => x.GuildId == guildId),
+                Modules.Moderator => _context.ConfigModerator.AsQueryable().FirstOrDefault(x => x.GuildId == guildId),
                 _ => throw new NotImplementedException()
             };
 
-            var guildConfig = await guildDB.AsQueryable().FirstOrDefaultAsync(x => x.GuildId == guildId);
-
-            if (guildConfig == null)
-            {
-                throw new ResourceNotFoundException($"Guild configuration with id {guildId} was not found.");
-            }
-
-            return guildConfig;
+            return config;
         }
 
     }

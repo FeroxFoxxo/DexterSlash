@@ -121,7 +121,7 @@ namespace DexterSlash.Extensions
 			await interaction.RespondAsync(
 				embed: embedBuilder.Build(),
 				ephemeral: ephemeral,
-				component: component?.Build());
+				components: component?.Build());
 		}
 
 		public static EmbedBuilder GetNowPlaying(this EmbedBuilder builder, LavalinkTrack track)
