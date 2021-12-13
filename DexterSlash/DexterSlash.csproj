@@ -10,10 +10,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="Properties\launchSettings (1).json" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.1" />
 		<PackageReference Include="CoreAdmin" Version="2.0.0" />
 		<PackageReference Include="Discord.Net.Labs" Version="3.4.9" />
